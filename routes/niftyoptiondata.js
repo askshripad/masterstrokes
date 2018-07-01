@@ -21,10 +21,8 @@ var dt = new Date();
 var output = [];
 
 var niftydata = 'niftydata';
-var sp10600 = path.join(__dirname, '..', '..', niftydata, 'sp10600.json');
-var sp10700 = path.join(__dirname, '..', '..', niftydata, 'sp10700.json');
-var sp10800 = path.join(__dirname, '..', '..', niftydata, 'sp10800.json');
-var BASE_DATA_DIR = path.join(__dirname, '..', '..', niftydata);
+
+//var BASE_DATA_DIR = path.join(__dirname, '..', '..', niftydata);
 var latestspdata = [];
 var niftyopen = 0;
 
@@ -85,7 +83,7 @@ function parseoptiondata(item, sp) {
     //console.log('Todays interest SP details right now ', item);
   }
   var filename = "sp" + sp.toString() + ".json";
-  filetowrite = path.join(BASE_DATA_DIR, filename);
+  filetowrite = path.join(globalvar.BASE_DATA_DIR, filename);
   //console.log('latestspdata ', latestspdata);
   AppendDataToJsonFile(item, filetowrite);
 }
@@ -247,10 +245,9 @@ setInterval(function () {
     //console.log('before fetch nse data ');
     fetchNSEData();
   }
-}, 20000);
+}, 50000);
 
 module.exports = {
   router: router,
-  latestspdata: latestspdata,
-  BASE_DATA_DIR: BASE_DATA_DIR
+  latestspdata: latestspdata
 }

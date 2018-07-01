@@ -19,14 +19,14 @@ var readline = require('readline');
 var dt = new Date();
 var fdate = moment(dt).format("DD-MM-YYYY");
 var filename = "writersview " + fdate.toString() + ".json";
-var wviewfile = path.join(niftyoptiondata.BASE_DATA_DIR, filename);
+var wviewfile = path.join(globalvar.BASE_DATA_DIR, filename);
 
 //var breakoutData = { Recotime: null, CurrLTP: null, StrikePrice: null, ROI: null, Action: null };
 
-var BASE_DATA_DIR = path.join(__dirname, '..', 'writersview');
+//var BASE_DATA_DIR = path.join(__dirname, '..', 'writersview');
 var fdate = moment(dt).format("DD-MM-YYYY");
 var filename = "writersview " + fdate.toString() + ".json";
-var filetowrite = path.join(BASE_DATA_DIR, filename);
+var filetowrite = path.join(globalvar.BASE_DATA_DIR, filename);
 /*const puppeteer = require('puppeteer');
  const Xray=require('x-ray');
 var phantom = require('x-ray-phantom');

@@ -38,7 +38,7 @@ app.use('/writersview', wview);
 var port = process.env.PORT || 8080;// 5000;
 
 var niftydata = 'niftydata';
-var BASE_DATA_DIR = path.join(__dirname, '..', niftydata);
+var BASE_DATA_DIR = path.join(__dirname, niftydata);
 
 
 
