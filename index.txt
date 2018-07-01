@@ -1,0 +1,223 @@
+
+var osmosis = require('osmosis');
+var fs = require('fs');
+var jsonfile = require('jsonfile');
+var express = require('express'),
+    path = require('path'),
+    bodyParser = require('body-parser'),
+    app = express();
+
+var cors = require('cors');
+var moment = require('moment');
+const readLastLine = require('read-last-line');
+const puppeteer = require('puppeteer');
+var scraper = require('table-scraper');
+
+app.use(cors());
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
+app.use(bodyParser.json());
+
+var port = 5000;
+var niftyurl = "https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp";
+var niftyIndexUrl = 'https://www.nseindia.com/live_market/dynaContent/live_watch/live_index_watch.htm';
+var output = [];
+
+var niftydata = 'niftydata';
+var sp10600 = path.join(__dirname, '..', niftydata, 'sp10600.json');
+var sp10700 = path.join(__dirname, '..', niftydata, 'sp10700.json');
+var sp10800 = path.join(__dirname, '..', niftydata, 'sp10800.json');
+var BASE_DATA_DIR = path.join(__dirname, '..', niftydata);
+
+function parseoptiondata(item, sp) {
+    //console.log('updating sp ', sp);
+    item.calloi = item.calloi.split(',').join('');
+    item.callcoi = item.callcoi.split(',').join('');
+    item.putoi = item.putoi.split(',').join('');
+    item.putcoi = item.putcoi.split(',').join('');
+
+    item.calloi = parseFloat(item.calloi) / 100000;
+    item.callcoi = parseFloat(item.callcoi) / 100000;
+
+    item.putoi = parseFloat(item.putoi) / 100000;
+    item.putcoi = parseFloat(item.putcoi) / 100000;
+
+    var filename = "sp" + sp.toString() + ".json";
+    filetowrite = path.join(BASE_DATA_DIR, filename);
+    console.log('filetowrite ', filetowrite);
+    AppendDataToJsonFile(item, filetowrite);
+}
+function fetchNSEData(res) {
+    osmosis
+        .get(niftyurl)
+        .find('//*[@id="octable"]//tr')
+        .set({
+            sp: 'td[12]',
+            calloi: 'td[2]',
+            callcoi: 'td[3]',
+            callltp: 'td[6]',
+            putltp: 'td[18]',
+            putoi: 'td[22]',
+            putcoi: 'td[21]'
+        })
+        .data(item => {
+            // console.log('new item' ,item);
+            var dt = new Date();
+            var newtime = moment(dt).format("HH-mm-ss");
+            item.date = moment(dt).format("DD-MM-YYYY");
+            item.time = newtime;
+            var sp = Number(item.sp);
+
+            if (!IsNullorUndefined(sp) && sp >= 10600 && sp <= 10800) {
+                ///  appendALLDataToJsonFile(item);
+                output.push(item);
+                //if (sp == 10600) {
+                // console.log('updating 10600');
+                // item.calloi = item.calloi.split(',').join('');
+                // item.callcoi = item.callcoi.split(',').join('');
+                // item.putoi = item.putoi.split(',').join('');
+                // item.putcoi = item.putcoi.split(',').join('');
+
+                // item.calloi = parseFloat(item.calloi) / 100000;
+                // item.callcoi = parseFloat(item.callcoi) / 100000;
+
+                // item.putoi = parseFloat(item.putoi) / 100000;
+                // item.putcoi = parseFloat(item.putcoi) / 100000;
+                // AppendDataToJsonFile(item, sp10600);
+                parseoptiondata(item, sp)
+                //}
+            }
+            //createOptionDataOutPutFile(output);
+        });
+}
+
+IsNullorUndefined = function (obj) {
+    if (obj == undefined || obj == null)
+        return true;
+    else
+        return false;
+}
+
+/* function appendALLDataToJsonFile(obj) {
+  var optiondatafile = path.join(__dirname, '..', 'Optiondata.json');
+  jsonfile.writeFile(optiondatafile, JSON.stringify(obj), function (err) {
+    if (err)
+      console.error(err)
+  })
+} */
+
+function AppendDataToJsonFile(obj, filename) {
+
+    //complete write
+    // jsonfile.writeFile(calldatafile, niftyOptionData, function (err) {
+    //     console.error(err)
+    // });
+    jsonfile.writeFile(filename, obj, { flag: 'a' }, function (err) {
+        if (err)
+            console.error(err)
+    })
+}
+
+// function createOptionDataOutPutFile(obj) {
+//     var optionoutputfile = path.join(__dirname, '..', 'OptionOutputdata.json');
+//     fs.writeFile(optionoutputfile, JSON.stringify(obj), function (err) {
+//         if (err)
+//             return console.log(err);
+//     });
+// }
+
+function ReadSPData(sp, index, result, res) {
+    if (index < sp.length) {
+        var filename = "sp" + sp[index] + ".json";
+        filetoread = path.join(BASE_DATA_DIR, filename);
+        console.log('file to read ', filetoread);
+        readLastLine.read(filetoread, 1).then(function (line) {
+            var data = JSON.parse(line);
+            result.push(data);
+            console.log('latest data ', data);
+            index++;
+            ReadSPData(sp, index, result, res)
+            if (index == sp.length)
+                res.send({ data: result });
+        }).catch(function (err) {
+            index++;
+            console.log(err.message);
+            res.send({ error: err });
+        });
+    }
+}
+
+app.get('/niftyopen', function (req, res) {
+    console.log('inside niftyopen ');
+
+    (async () => {
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
+        await page.goto(`https://www.nseindia.com/live_market/dynaContent/live_watch/live_index_watch.htm`);
+
+        const data = await page.evaluate(() => {
+            const tds = Array.from(document.querySelectorAll('table tr td'))
+            return tds.map(td => td.innerHTML)
+        });
+
+        //You will now have an array of strings
+        //[ 'One', 'Two', 'Three', 'Four' ]
+        console.log(data);
+        res.send({ IndexData: data[0] });
+        //One
+        //console.log(data[0]);
+        await browser.close();
+    })();
+
+});
+
+app.post('/nifty', function (req, res) {
+    //var sp = req.body.sp;
+    console.log('getting nifty data for ', req.body.sp);
+    if (IsNullorUndefined(req.body.sp)) {
+        console.log('Required SP is null.', req.body.sp);
+        res.send({ error: "Required SP is null." });
+        return;
+    }
+    var sp = req.body.sp;
+    var index = 0;
+    var result = [];
+    ReadSPData(sp, index, result, res)
+    return;
+    var filetoread = sp10700;
+    var sptoread = sp[index];
+    if (sptoread === "10600")
+        filetoread = sp10600;
+    if (sptoread === "10700")
+        filetoread = sp10700;
+    readLastLine.read(filetoread, 1).then(function (line) {
+        var data = JSON.parse(line);
+        console.log('latest data ', data);
+        res.send({ data: data });
+    }).catch(function (err) {
+        console.log(err.message);
+        res.send({ error: err });
+    });
+});
+
+app.get('/*', function (req, res) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+
+    res.send();
+});
+
+
+
+var server = app.listen(port, function () {
+    console.log("Listening to port %s", server.address().port);
+});
+
+
+setInterval(function () {
+    // Do something every 5 seconds
+    console.log('Looking for new Nifty data....');
+    //fetchNSEData();
+}, 30000);
+
