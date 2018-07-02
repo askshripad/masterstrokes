@@ -62,6 +62,10 @@ router.post('/data', function (req, res) {
   }
   else {
     fs.readFile(wviewfile, 'utf-8', (err, file) => {
+      if (file == null || file == undefined) {
+        res.send({ data: null, breakout: breakoutData });
+        return;
+      }
       const lines = file.split('\n')
       var counter = 0;
       var line = null;

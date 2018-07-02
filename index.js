@@ -117,6 +117,20 @@ var server = app.listen(port, function () {
     if (!fs.existsSync(BASE_DATA_DIR)) {
         fs.mkdirSync(BASE_DATA_DIR);
     }
+    else {
+        fs.readdir(BASE_DATA_DIR, (err, files) => {
+            if (err)
+                console.log('error in readdir ', err);
+            else {
+                for (const file of files) {
+                    fs.unlink(path.join(BASE_DATA_DIR, file), err => {
+                        if (err)
+                            console.log('error while deleting files ', err);;
+                    });
+                }
+            }
+        });
+    }
 });
 
 
