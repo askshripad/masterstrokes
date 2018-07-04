@@ -113,6 +113,11 @@ app.get('/*', function (req, res) {
 
 
 var server = app.listen(port, function () {
+
+    var d = new Date();
+    var n = d.getTimezoneOffset();
+    d.setMinutes(d.getMinutes() + Math.abs(n));
+    console.log('After Timezone offset ', d);
     console.log("Listening to port %s", server.address().port);
     if (!fs.existsSync(BASE_DATA_DIR)) {
         fs.mkdirSync(BASE_DATA_DIR);

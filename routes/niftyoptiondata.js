@@ -42,7 +42,7 @@ IsNullorUndefined = function (obj) {
 
 function parseoptiondata(item, sp) {
   //console.log('updating sp ', sp);
-  var precision = 3;
+  var precision = 2;
   item.calloi = item.calloi.split(',').join('');
   item.callcoi = item.callcoi.split(',').join('');
   item.putoi = item.putoi.split(',').join('');
@@ -54,28 +54,28 @@ function parseoptiondata(item, sp) {
   else
     item.calloi = parseFloat(item.calloi) / 100000;
 
-  item.calloi.toPrecision(precision);
+  item.calloi.toFixed(precision);
 
   if (item.callcoi.length == 7 || item.callcoi.length == 6)
     item.callcoi = parseFloat(item.callcoi) / 100000;
   else
     item.callcoi = parseFloat(item.callcoi) / 100000;
 
-  item.callcoi.toPrecision(precision);
+  item.callcoi.toFixed(precision);
 
   if (item.putoi.length == 7 || item.putoi.length == 6)
     item.putoi = parseFloat(item.putoi) / 100000;
   else
     item.putoi = parseFloat(item.putoi) / 100000;
 
-  item.putoi.toPrecision(precision);
+  item.putoi.toFixed(precision);
 
   if (item.putcoi.length == 7 || item.putcoi.length == 6)
     item.putcoi = parseFloat(item.putcoi) / 100000;
   else
     item.putcoi = parseFloat(item.putcoi) / 100000;
 
-  item.putcoi.toPrecision(precision);
+  item.putcoi.toFixed(precision);
 
   item.sp = Number(item.sp);
   latestspdata.push(item);
@@ -145,7 +145,7 @@ function AppendDataToJsonFile(obj, filename) {
 function getnowSP() {
   return new Promise((resolve, reject) => {
     osmosis.get(globalvar.moneyControlURL)
-      .find('//div[@id="mc_mainWrapper"]')
+      .find('//*[@id="mc_mainWrapper"]')
       .set({
         nifty: 'div[3]/div[1]/div[4]/div[1]/strong',
         open: '//div[@id="mc_mainWrapper"]//tr[2]/td[1][@class="bggry02 br01"]:html',
@@ -156,9 +156,39 @@ function getnowSP() {
       })
       .data
       (item => {
-        //console.log(item)  
+        //console.log('II ', item);
         var arrNiftyDT = [];
-        arrNiftyDT.push(item.nifty);
+        if (item.open != null || item.open != undefined) {
+          var n = item.open.indexOf("</span>");
+          var open = item.open.substring(n + 7);
+          open = open.trim();
+          open = open.split(',').join('');
+          console.log('open ', open);
+          arrNiftyDT.push(open);
+        }
+        if (item.high != null || item.high != undefined) {
+          var n = item.high.indexOf("</span>");
+          var high = item.high.substring(n + 7);
+          high = high.trim();
+          high = high.split(',').join('');
+          console.log('high ', high);
+          arrNiftyDT.push(high);
+        }
+        if (item.low != null || item.low != undefined) {
+          var n = item.low.indexOf("</span>");
+          var low = item.low.substring(n + 7);
+          low = low.trim();
+          low = low.split(',').join('');
+          console.log('low ', low);
+          arrNiftyDT.push(low);
+        }
+        if (item.nifty != null || item.nifty != undefined) {
+          item.nifty = item.nifty.trim();
+          item.nifty = item.nifty.split(',').join('');
+          console.log('close ', item.nifty);
+          arrNiftyDT.push(item.nifty);
+        }
+
         arrNiftyDT.push(item.dateTime);
 
         if (!IsNullorUndefined(arrNiftyDT)) {
@@ -245,7 +275,7 @@ setInterval(function () {
     //console.log('before fetch nse data ');
     fetchNSEData();
   }
-}, 50000);
+}, 10000);
 
 module.exports = {
   router: router,

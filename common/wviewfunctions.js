@@ -168,7 +168,9 @@ function CalculateCOI(latestspdata) {
     var temp = lodash.replace((picked.callcoi), ',', '');
     arrCallCOI.push(parseFloat(temp));
     arrCallLtp.push(parseFloat(picked.callltp));
-    arrCallOI.push(picked.calloi);
+    var flOI = parseFloat(picked.calloi);
+    flOI = flOI.toFixed(2);
+    arrCallOI.push(flOI);
 
   });
 
@@ -178,7 +180,9 @@ function CalculateCOI(latestspdata) {
     var temp = lodash.replace((picked.putcoi), ',', '');
     arrPutCOI.push(parseFloat(temp));
     arrPutLtp.push(parseFloat(picked.putltp));
-    arrPutOI.push(picked.putoi);
+    var flOI = parseFloat(picked.putoi);
+    flOI = flOI.toFixed(2);
+    arrPutOI.push(flOI);
   });
 
   var dt = new Date();
@@ -186,7 +190,7 @@ function CalculateCOI(latestspdata) {
   var newtime = moment(dt).format("HH-mm-ss");
   console.log('CALL Details ++++++++++++', newtime);
   console.log('CALL ATM:' + callarrSPs[0], 'CALL1:' + callarrSPs[1], 'CALL2:' + callarrSPs[2]);
-  //console.log('CALL OI:' + arrCallOI[0], 'OI1:' + arrCallOI[1], 'OI2:' + arrCallOI[2]);
+  console.log('CALL OI:' + arrCallOI[0], 'OI1:' + arrCallOI[1], 'OI2:' + arrCallOI[2]);
   console.log('CALL COI:' + arrCallCOI[0], 'COI1:' + arrCallCOI[1], 'COI2:' + arrCallCOI[2]);
   console.log('Callltp:' + arrCallLtp[0], 'LTP1:' + arrCallLtp[1], 'LTP2:' + arrCallLtp[2]);
 
@@ -196,9 +200,13 @@ function CalculateCOI(latestspdata) {
   console.log('Put ltp:' + arrPutLtp[0], 'LTP1:' + arrPutLtp[1], 'LTP2:' + arrPutLtp[2]);
 
   var totalCallCOI = arrCallCOI[0] + arrCallCOI[1] + arrCallCOI[2];  //atmcoi+call1coi+call2coi
+  totalCallCOI = parseFloat(totalCallCOI);
+  totalCallCOI = totalCallCOI.toFixed(2);
   console.log('totalCallCOI: ' + totalCallCOI);
 
   var totalPutCOI = arrPutCOI[0] + arrPutCOI[1] + arrPutCOI[2];   //atmcoi+put1coi+put2coi
+  totalPutCOI = parseFloat(totalPutCOI);
+  totalPutCOI = totalPutCOI.toFixed(2);
   console.log('totalPutCOI1: ' + totalPutCOI);
 
   //
