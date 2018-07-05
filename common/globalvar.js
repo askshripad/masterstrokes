@@ -7,4 +7,5 @@ exports.moneyControlURL = 'https://www.moneycontrol.com/indian-indices/nifty-50-
 exports.BASE_DATA_DIR = path.join(__dirname, '..', 'niftydata');
 
 //Breakouts
-exports.breakoutData = { Recotime: null, CurrLTP: null, StrikePrice: null, ROI: null, Action: null };
+exports.breakoutData = { recotime: null, callltp: null, strikeprice: null, ROI: null, action: null };
+exports.nifty50 = { open: null, high: null, low: null, close: null };

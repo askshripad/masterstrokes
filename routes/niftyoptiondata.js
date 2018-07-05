@@ -25,7 +25,7 @@ var niftydata = 'niftydata';
 //var BASE_DATA_DIR = path.join(__dirname, '..', '..', niftydata);
 var latestspdata = [];
 var niftyopen = 0;
-
+//var nifty50 = { open: null, high: null, low: null, close: null };
 
 router.get('/test', function (req, res) {
   res.json({
@@ -165,6 +165,7 @@ function getnowSP() {
           open = open.split(',').join('');
           console.log('open ', open);
           arrNiftyDT.push(open);
+          globalvar.nifty50.open = open;
         }
         if (item.high != null || item.high != undefined) {
           var n = item.high.indexOf("</span>");
@@ -173,6 +174,7 @@ function getnowSP() {
           high = high.split(',').join('');
           console.log('high ', high);
           arrNiftyDT.push(high);
+          globalvar.nifty50.high = high;
         }
         if (item.low != null || item.low != undefined) {
           var n = item.low.indexOf("</span>");
@@ -181,12 +183,14 @@ function getnowSP() {
           low = low.split(',').join('');
           console.log('low ', low);
           arrNiftyDT.push(low);
+          globalvar.nifty50.low = low;
         }
         if (item.nifty != null || item.nifty != undefined) {
           item.nifty = item.nifty.trim();
           item.nifty = item.nifty.split(',').join('');
           console.log('close ', item.nifty);
           arrNiftyDT.push(item.nifty);
+          globalvar.nifty50.close = item.nifty;
         }
 
         arrNiftyDT.push(item.dateTime);
@@ -275,7 +279,7 @@ setInterval(function () {
     //console.log('before fetch nse data ');
     fetchNSEData();
   }
-}, 10000);
+}, 90000);
 
 module.exports = {
   router: router,

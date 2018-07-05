@@ -250,7 +250,7 @@ function CalculateCOI(latestspdata) {
   latestspdata = null;
   //
 
-  if (globalvar.breakoutData.Action == null) {
+  if (globalvar.breakoutData.action == null) {
     LookForSignal(newtime, totalCallCOI, totalPutCOI, item.callsp, item.putsp,
       item.callltp, item.putltp);
   }

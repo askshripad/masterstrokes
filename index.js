@@ -98,7 +98,8 @@ app.post('/nifty', function (req, res) {
 app.post('/dashboard', function (req, res) {
     console.log('getting dashboard data for ');
     var breakoutData = globalvar.breakoutData;
-    res.send({ breakout: breakoutData });
+    var nifty50 = globalvar.nifty50;
+    res.send({ breakout: breakoutData, nifty50: nifty50 });
 });
 
 app.get('/*', function (req, res) {
@@ -112,13 +113,22 @@ app.get('/*', function (req, res) {
 });
 
 
+function beep() {
+    process.stdout.write('\x07');
+}
+
 var server = app.listen(port, function () {
 
-    var d = new Date();
-    var n = d.getTimezoneOffset();
-    d.setMinutes(d.getMinutes() + Math.abs(n));
-    console.log('After Timezone offset ', d);
-    console.log("Listening to port %s", server.address().port);
+    // var d = new Date();
+    // var n = d.getTimezoneOffset();
+    // d.setMinutes(d.getMinutes() + Math.abs(n));
+    // console.log('After Timezone offset ', d);
+    // console.log("Listening to port %s", server.address().port);
+    //console.log('\u0007');    
+    //process.stdout.write('\x07');
+    // console.log('before');
+    // beep(5);
+    // console.log('after');
     if (!fs.existsSync(BASE_DATA_DIR)) {
         fs.mkdirSync(BASE_DATA_DIR);
     }
