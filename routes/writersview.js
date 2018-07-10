@@ -48,12 +48,13 @@ router.post('/data', function (req, res) {
   var bo = { time: dt, sp: sp };
   var breakoutData = globalvar.breakoutData;//{ Recotime: null, CurrLTP: null, StrikePrice: null, ROI: null, Action: null };//
   console.log('breakout data ', breakoutData);
+  var offset = dt.getTimezoneOffset();
   if (req.body.fetchall == false) {
     readLastLine.read(wviewfile, 1).then(function (line) {
       var data = JSON.parse(line);
       result.push(data);
       console.log('latest wview data ', data);
-      res.send({ data: result, breakout: breakoutData });
+      res.send({ data: result, breakout: breakoutData, offset: offset });
     }).catch(function (err) {
 
       console.log(err.message);
@@ -63,7 +64,7 @@ router.post('/data', function (req, res) {
   else {
     fs.readFile(wviewfile, 'utf-8', (err, file) => {
       if (file == null || file == undefined) {
-        res.send({ data: null, breakout: breakoutData });
+        res.send({ data: null, breakout: breakoutData, offset: offset });
         return;
       }
       const lines = file.split('\n')
@@ -81,7 +82,7 @@ router.post('/data', function (req, res) {
         if (index == (lines.length - 1)) {
           //console.log('parsing last line ', line);
 
-          res.send({ data: result.reverse(), breakout: breakoutData });
+          res.send({ data: result.reverse(), breakout: breakoutData, offset: offset  });
         }
       }
     });

@@ -33,7 +33,7 @@ function LookForSignal(newtime, totalcallCOI, totalputCOI, callsp, putsp, calllt
     return;
   }
   else if (totalputCOI < 0 && totalcallCOI > 0 && diff > 2) {
-    var signal = { recotime: newtime, recoltp: putltp, currentLTP: putltp, strikeprice: putsp, roi: 0, action: "Put Buy" };
+    var signal = { recotime: newtime, recoltp: putltp, currentLTP: putltp, strikeprice: putsp, ROI: 0, action: "Put Buy" };
     globalvar.breakoutData = signal;
     console.log('PUT SIGNAL GENERATED......');
     return;
@@ -50,6 +50,17 @@ function CheckForExit(newtime, totalcallCOI, totalputCOI, callsp, putsp, callltp
   var profitpoint = 20;
   var losspoint = 10;
   var recltp = globalvar.breakoutData.recoltp;
+
+  if (globalvar.breakoutData.action == "Call Buy") {
+    globalvar.breakoutData.currentLTP = callltp;
+    var diff = (callltp - recltp);
+    globalvar.breakoutData.ROI = diff;
+  }
+  else {
+    globalvar.breakoutData.currentLTP = putltp;
+    var diff = (putltp - recltp);
+    globalvar.breakoutData.ROI = diff;
+  }
 
   if (globalvar.breakoutData.action == "Call Buy" && callltp < recltp && (recltp - callltp) >= 10) {
     globalvar.breakoutData.action = "EXIT";
@@ -187,7 +198,7 @@ function CalculateCOI(latestspdata) {
 
   var dt = new Date();
 
-  var newtime = moment(dt).format("HH-mm-ss");
+  var newtime = moment(dt).format("HH:mm:ss");
   console.log('CALL Details ++++++++++++', newtime);
   console.log('CALL ATM:' + callarrSPs[0], 'CALL1:' + callarrSPs[1], 'CALL2:' + callarrSPs[2]);
   console.log('CALL OI:' + arrCallOI[0], 'OI1:' + arrCallOI[1], 'OI2:' + arrCallOI[2]);
@@ -212,7 +223,14 @@ function CalculateCOI(latestspdata) {
   //
   var item = {};
   var now = new Date();
-  var currtime = moment(now).format("HH-mm-ss");
+  var ist = moment(now).utcOffset("+05:30").format();//moment.utc().format('DD-MM-YYYY HH:mm:ss');//globalvar.convertLocalDatetoUTCDate(now);
+  console.log('IST : ', ist);
+  // var local1 = moment(utc1).local();
+  // console.log('LOCAL1 : ', local1);
+  //console.log('UTC FULL TIME %%%%% ', moment(now).utc());
+  //var currtime = globalvar.ConvertToLocalTime("India",'+5.5');
+  //var currtime = globalvar.ConvertToLocalTime("India", '-5.5');
+  var currtime = ist;//moment.utc();//.format('DD-MM-YYYY HH:mm:ss');//.format("HH-mm-ss");
   item.time = currtime;
   item.calloi = arrCallOI[0];
   item.putoi = arrPutOI[0];
@@ -251,11 +269,11 @@ function CalculateCOI(latestspdata) {
   //
 
   if (globalvar.breakoutData.action == null) {
-    LookForSignal(newtime, totalCallCOI, totalPutCOI, item.callsp, item.putsp,
+    LookForSignal(currtime, totalCallCOI, totalPutCOI, item.callsp, item.putsp,
       item.callltp, item.putltp);
   }
   else {
-    CheckForExit(newtime, totalCallCOI, totalPutCOI, item.callsp, item.putsp,
+    CheckForExit(currtime, totalCallCOI, totalPutCOI, item.callsp, item.putsp,
       item.callltp, item.putltp);
   }
 

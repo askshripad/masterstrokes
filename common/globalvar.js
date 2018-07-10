@@ -9,3 +9,31 @@ exports.BASE_DATA_DIR = path.join(__dirname, '..', 'niftydata');
 //Breakouts
 exports.breakoutData = { recotime: null, callltp: null, strikeprice: null, ROI: null, action: null };
 exports.nifty50 = { open: null, high: null, low: null, close: null };
+
+exports.convertLocalDatetoUTCDate = function (date) {
+    return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds());
+}
+
+exports.convertUTCDateToLocalDate = function (date) {
+    return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds()));
+}
+
+exports.ConvertToLocalTime = function (country, offset) {
+
+    // create Date object for current location
+    d = new Date();
+
+    // convert to msec
+    // add local time zone offset 
+    // get UTC time in msec
+    utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+
+    // create new Date object for different country
+    // using supplied offset
+    nd = new Date(utc + (3600000 * offset));
+
+    // return time as a string
+    console.log("The local time in " + country + " is " + nd.toLocaleString());
+    return nd;
+
+}

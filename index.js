@@ -126,9 +126,7 @@ var server = app.listen(port, function () {
     // console.log("Listening to port %s", server.address().port);
     //console.log('\u0007');    
     //process.stdout.write('\x07');
-    // console.log('before');
     // beep(5);
-    // console.log('after');
     if (!fs.existsSync(BASE_DATA_DIR)) {
         fs.mkdirSync(BASE_DATA_DIR);
     }
