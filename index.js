@@ -79,27 +79,15 @@ app.post('/nifty', function (req, res) {
     var result = [];
     ReadSPData(sp, index, result, res)
     return;
-    var filetoread = sp10700;
-    var sptoread = sp[index];
-    if (sptoread === "10600")
-        filetoread = sp10600;
-    if (sptoread === "10700")
-        filetoread = sp10700;
-    readLastLine.read(filetoread, 1).then(function (line) {
-        var data = JSON.parse(line);
-        console.log('latest data ', data);
-        res.send({ data: data });
-    }).catch(function (err) {
-        console.log(err.message);
-        res.send({ error: err });
-    });
+
 });
 
 app.post('/dashboard', function (req, res) {
     console.log('getting dashboard data for ');
-    var breakoutData = globalvar.breakoutData;
+    var breakoutData = { recotime: null, callltp: null, strikeprice: null, ROI: null, action: null };
+    //var breakoutData = globalvar.breakoutData;
     var nifty50 = globalvar.nifty50;
-    res.send({ breakout: breakoutData, nifty50: nifty50 });
+    res.send({ breakout: breakoutData, nifty50: nifty50, makertoff: globalvar.marketoff });
 });
 
 app.get('/*', function (req, res) {
@@ -127,16 +115,18 @@ var server = app.listen(port, function () {
     //console.log('\u0007');    
     //process.stdout.write('\x07');
     // beep(5);
-    if (!fs.existsSync(BASE_DATA_DIR)) {
-        fs.mkdirSync(BASE_DATA_DIR);
+    console.log('listening ', globalvar.BASE_DATA_DIR);
+    if (!fs.existsSync(globalvar.BASE_DATA_DIR)) {
+        fs.mkdirSync(globalvar.BASE_DATA_DIR);
+        console.log('dir created ', globalvar.BASE_DATA_DIR);
     }
     else {
-        fs.readdir(BASE_DATA_DIR, (err, files) => {
+        fs.readdir(globalvar.BASE_DATA_DIR, (err, files) => {
             if (err)
                 console.log('error in readdir ', err);
             else {
                 for (const file of files) {
-                    fs.unlink(path.join(BASE_DATA_DIR, file), err => {
+                    fs.unlink(path.join(globalvar.BASE_DATA_DIR, file), err => {
                         if (err)
                             console.log('error while deleting files ', err);;
                     });

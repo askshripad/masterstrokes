@@ -5,11 +5,12 @@ exports.niftyurl = "https://www.nseindia.com/live_market/dynaContent/live_watch/
 exports.moneyControlURL = 'https://www.moneycontrol.com/indian-indices/nifty-50-9.html';
 
 exports.BASE_DATA_DIR = path.join(__dirname, '..', 'niftydata');
-
+//exports.EXPIRY_DIR = path.join(__dirname, '..', 'niftydata');
 //Breakouts
 exports.breakoutData = { recotime: null, callltp: null, strikeprice: null, ROI: null, action: null };
 exports.nifty50 = { open: null, high: null, low: null, close: null };
-
+exports.marketoff = false;
+exports.wviewfile = null;
 exports.convertLocalDatetoUTCDate = function (date) {
     return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds());
 }

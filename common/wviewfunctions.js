@@ -11,17 +11,12 @@ var moment = require('moment');
 
 var niftyoptiondata = require('../routes/niftyoptiondata');
 var globalvar = require('./globalvar');
+var todayswviewdata = [];
+// var dt = new Date();
+// var fdate = moment(dt).format("DD-MM-YYYY");
+// var filename = "writersview " + fdate.toString() + ".json";
+// var wviewfile = path.join(globalvar.BASE_DATA_DIR, filename);
 
-var dt = new Date();
-var fdate = moment(dt).format("DD-MM-YYYY");
-var filename = "writersview " + fdate.toString() + ".json";
-var wviewfile = path.join(globalvar.BASE_DATA_DIR, filename);
-
-var BASE_DATA_DIR = path.join(__dirname, '..', 'writersview');
-var fdate = moment(dt).format("DD-MM-YYYY");
-var filename = "writersview " + fdate.toString() + ".json";
-var filetowrite = path.join(BASE_DATA_DIR, filename);
-//var latestspdata = null;
 
 function LookForSignal(newtime, totalcallCOI, totalputCOI, callsp, putsp, callltp, putltp) {
   var diff = Math.abs(totalcallCOI) + Math.abs(totalputCOI);
@@ -50,16 +45,21 @@ function CheckForExit(newtime, totalcallCOI, totalputCOI, callsp, putsp, callltp
   var profitpoint = 20;
   var losspoint = 10;
   var recltp = globalvar.breakoutData.recoltp;
+  var niftylot = 75;
 
   if (globalvar.breakoutData.action == "Call Buy") {
     globalvar.breakoutData.currentLTP = callltp;
     var diff = (callltp - recltp);
-    globalvar.breakoutData.ROI = diff;
+    var froi = parseFloat(diff * niftylot);
+    froi = froi.toFixed(2);
+    globalvar.breakoutData.ROI = froi;// diff * niftylot;
   }
   else {
     globalvar.breakoutData.currentLTP = putltp;
     var diff = (putltp - recltp);
-    globalvar.breakoutData.ROI = diff;
+    var froi = parseFloat(diff * niftylot);
+    froi = froi.toFixed(2);
+    globalvar.breakoutData.ROI = froi;//diff * niftylot;
   }
 
   if (globalvar.breakoutData.action == "Call Buy" && callltp < recltp && (recltp - callltp) >= 10) {
@@ -129,7 +129,9 @@ function IsExpiryWeekStarted() {
         expiryDate: 'option[2]'
       }).data(item => {
         console.log('expiry date ', item.expiryDate);
+
         //var lastThirsday=moment(new Date(item.expiryDate)).format("DD-MM-YYYY");
+        var dt = new Date();
         var today = moment(dt);
         var lsThir = moment(new Date(item.expiryDate));
         var expdt = moment(new Date(item.expiryDate));
@@ -150,20 +152,21 @@ function IsExpiryWeekStarted() {
   });
 }
 
+var i = 1;
 function CalculateCOI(latestspdata) {
   var callarrSPs = [];
   var putarrSPs = [];
   callarrSPs.push(atmSP);
   callarrSPs.push(callATM1);
   callarrSPs.push(callATM2);
-
+  console.log('call arr ', callarrSPs);
   putarrSPs.push(atmSP);
   putarrSPs.push(putATM1);
   putarrSPs.push(putATM2);
   console.log('put arr ', putarrSPs);
   var arrCallCOI = [];
   var arrCallOI = [];
-  var arrPutOI = [];
+  //var arrPutOI = [];
 
   var arrPutCOI = [];
   var arrPutOI = [];
@@ -173,9 +176,10 @@ function CalculateCOI(latestspdata) {
   //console.log('saved data ', data);
   callarrSPs.forEach(element => {
     console.log('input call sp ', element);
+    //console.log('latest sp data ', latestspdata);
     //var picked = lodash.filter(latestspdata, x => x.sp == element);
     var picked = latestspdata.find(x => x.sp == element);
-    //console.log('call picked ', picked);
+    console.log('call picked ', picked);
     var temp = lodash.replace((picked.callcoi), ',', '');
     arrCallCOI.push(parseFloat(temp));
     arrCallLtp.push(parseFloat(picked.callltp));
@@ -215,10 +219,20 @@ function CalculateCOI(latestspdata) {
   totalCallCOI = totalCallCOI.toFixed(2);
   console.log('totalCallCOI: ' + totalCallCOI);
 
+  var totalCallOI = arrCallOI[0] + arrCallOI[1] + arrCallOI[2];  //atmcoi+call1coi+call2coi
+  totalCallOI = parseFloat(totalCallOI);
+  totalCallOI = totalCallOI.toFixed(2);
+  console.log('totalCallOI: ' + totalCallCOI);
+
   var totalPutCOI = arrPutCOI[0] + arrPutCOI[1] + arrPutCOI[2];   //atmcoi+put1coi+put2coi
   totalPutCOI = parseFloat(totalPutCOI);
   totalPutCOI = totalPutCOI.toFixed(2);
   console.log('totalPutCOI1: ' + totalPutCOI);
+
+  var totalPutOI = arrPutOI[0] + arrPutOI[1] + arrPutOI[2];   //atmcoi+put1coi+put2coi
+  totalPutOI = parseFloat(totalPutOI);
+  totalPutOI = totalPutOI.toFixed(2);
+  console.log('totalPutOI: ' + totalPutOI);
 
   //
   var item = {};
@@ -232,12 +246,73 @@ function CalculateCOI(latestspdata) {
   //var currtime = globalvar.ConvertToLocalTime("India", '-5.5');
   var currtime = ist;//moment.utc();//.format('DD-MM-YYYY HH:mm:ss');//.format("HH-mm-ss");
   item.time = currtime;
-  item.calloi = arrCallOI[0];
-  item.putoi = arrPutOI[0];
+  //item.calloi = arrCallOI[0];
+  //item.putoi = arrPutOI[0];
   var precision = 3;
   //console.log('OIII ', item.calloi, item.putoi);
-  item.callcoi = parseFloat(totalCallCOI);
-  item.putcoi = parseFloat(totalPutCOI);
+  item.callcoi = totalCallCOI;
+  item.putcoi = totalPutCOI;
+  item.calloi = totalCallOI;
+  item.putoi = totalPutOI;
+  // COMMENT it
+  console.log('III ', i % 2);
+  if (i > 5 && i % 2 == 0) {
+    item.calloi = item.calloi - i;
+  }
+  else
+    item.calloi = item.calloi + i;
+
+  i++;
+  item.calloi = parseFloat(item.calloi).toFixed(2);
+  console.log('modified call OI ', item.calloi);
+  //
+  // Calculate CALL OI from LOW
+  item.calloifromlow = 0.00;
+  item.calloifromhigh = 0.00;
+  item.putoifromlow = 0.00;
+  item.putoifromhigh = 0.00;
+  if (todayswviewdata.length > 0) {
+    //Find lowest item from oi array
+    var minoi = Math.min.apply(null, todayswviewdata.map(function (item) {
+      return item.calloi;
+    }));
+    var maxoi = Math.max.apply(null, todayswviewdata.map(function (item) {
+      return item.calloi;
+    }));
+    console.log('min and max call oi : ', minoi, maxoi);
+    if (item.calloi > minoi) {
+      item.calloifromlow = item.calloi - minoi;
+      item.calloifromlow = item.calloifromlow.toFixed(2);
+    }
+
+    if (item.calloi < maxoi) {
+      item.calloifromhigh = maxoi - item.calloi;
+      item.calloifromhigh = item.calloifromhi.toFixed(2);
+    }
+
+    var minputoi = Math.min.apply(null, todayswviewdata.map(function (item) {
+      return item.putoi;
+    }));
+    var maxputoi = Math.max.apply(null, todayswviewdata.map(function (item) {
+      return item.putoi;
+    }));
+
+    console.log('min and max putoi : ', minputoi, maxputoi);
+    if (item.putoi > minputoi) {
+      item.putoifromlow = item.putoi - minputoi;
+      item.putoifromlow = item.putoifromlow.toFixed(2);
+    }
+
+    if (item.putoi < maxputoi) {
+      item.putoifromhigh = maxputoi - item.putoi;
+      item.putoifromhigh = item.putoifromhigh.toFixed(2);
+    }
+
+  }
+
+  console.log('CALL OI DIff high low ', item.calloifromhigh, item.calloifromlow);
+  console.log('PUT OI DIff high low ', item.putoifromhigh, item.putoifromlow);
+  //
   console.log('current day ', now.getDate());
   if (now.getDate() <= 10) { //OTM
     console.log('OTM');
@@ -264,7 +339,8 @@ function CalculateCOI(latestspdata) {
 
   //niftyoptiondata.latestspdata = [];
   console.log('Appending wview data ');
-  AppendDataToJsonFile(item, wviewfile);
+  todayswviewdata.push(item);
+  AppendDataToJsonFile(item, globalvar.wviewfile);
   latestspdata = null;
   //
 
@@ -288,7 +364,7 @@ CheckWritersView = function (newspdata) {
   niftyoptiondata.getATM()
     .then(function (atmDT) {
       // console.log(atm);
-      console.log('after getatm');
+      console.log('after getatm ', atmDT[0]);
       atmSP = Number(atmDT[0]);
       //if (IsExpiryWeekStarted()) {
       IsExpiryWeekStarted()

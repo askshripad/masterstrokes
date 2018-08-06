@@ -54,7 +54,7 @@ router.post('/data', function (req, res) {
       var data = JSON.parse(line);
       result.push(data);
       console.log('latest wview data ', data);
-      res.send({ data: result, breakout: breakoutData, offset: offset });
+      res.send({ data: result, breakout: breakoutData, offset: offset, makertoff: globalvar.marketoff });
     }).catch(function (err) {
 
       console.log(err.message);
@@ -64,7 +64,7 @@ router.post('/data', function (req, res) {
   else {
     fs.readFile(wviewfile, 'utf-8', (err, file) => {
       if (file == null || file == undefined) {
-        res.send({ data: null, breakout: breakoutData, offset: offset });
+        res.send({ data: null, breakout: breakoutData, offset: offset, makertoff: globalvar.marketoff });
         return;
       }
       const lines = file.split('\n')
@@ -82,7 +82,7 @@ router.post('/data', function (req, res) {
         if (index == (lines.length - 1)) {
           //console.log('parsing last line ', line);
 
-          res.send({ data: result.reverse(), breakout: breakoutData, offset: offset  });
+          res.send({ data: result.reverse(), breakout: breakoutData, offset: offset, makertoff: globalvar.marketoff });
         }
       }
     });

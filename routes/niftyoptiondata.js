@@ -79,9 +79,7 @@ function parseoptiondata(item, sp) {
 
   item.sp = Number(item.sp);
   latestspdata.push(item);
-  if (item.sp == 10750 || item.sp == 10800) {
-    //console.log('Todays interest SP details right now ', item);
-  }
+
   var filename = "sp" + sp.toString() + ".json";
   filetowrite = path.join(globalvar.BASE_DATA_DIR, filename);
   //console.log('latestspdata ', latestspdata);
@@ -214,12 +212,10 @@ exports.getATM = function () {
         getStrikePriceArr()
           .then(
           data => {
-            // console.log(data[0]);
+            //console.log('data ', data);
             var curr = data[0];
-            // console.log("SPTOCHK:"+curr);
-            //  console.log("num:"+indexNifty);
             var diff = Math.abs(indexNifty[0] - curr);
-            // console.log(diff);
+            //console.log('diff ', diff);
             for (var val = 0; val < data.length; val++) {
               var newdiff = Math.abs(indexNifty[0] - data[val]);
               if (newdiff < diff) {
@@ -247,6 +243,10 @@ exports.getATM = function () {
 function getStrikePriceArr() {
   return new Promise((resolve, reject) => {
     var niftySP = [];
+    var upperlimit = Number(globalvar.nifty50.open) + 200;
+    var lowerlimit = Number(globalvar.nifty50.open) - 200;
+    //console.log('upper limit ', upperlimit);
+    //console.log('lower limit ', lowerlimit);
     osmosis.get(globalvar.niftyurl)
       .find('//table[@id="octable"]//tr')
       .set({
@@ -254,18 +254,50 @@ function getStrikePriceArr() {
       })
       .data
       (item => {
-        //console.log(item); 
         var sp = Number(item.strikePrice);
-        if (!IsNullorUndefined(sp) && sp >= 10200 && sp <= 10900) {
+
+        if (!IsNullorUndefined(sp) && sp >= lowerlimit && sp <= upperlimit) {
           niftySP.push(item.strikePrice);
+          //console.log('niftySP ', niftySP);
         }
       })
       .done(() => resolve(niftySP));
   });
 }
+var i = 20;
+var startTime = moment('09:45', "HH:mm");
+var endTime = moment('18:59', "HH:mm");
 setInterval(function () {
   // Do something every 5 seconds
   console.log('Looking for new Nifty data [ALL SPS]....');
+  var now = new Date();
+  var istHrs = moment(now).utcOffset("+05:30").format('HH');
+  var istmins = moment(now).utcOffset("+05:30").format('mm');
+  //istHrs = Number(istHrs);
+  //istmins = Number(istmins);
+  //var currentTime = moment(now).utcOffset("+05:30");    // e.g. 11:00 pm
+  //amIBetween = currentTime.isBetween(startTime, endTime);
+  //console.log(amIBetween);
+  //i++;
+  // if (amIBetween == false) {
+  //   globalvar.marketoff = true;
+  //   console.log('Market Closed');
+  //   return;
+  // }
+  if (istHrs == 9 && istmins < 30) {
+    globalvar.marketoff = true;
+    globalvar.wviewfile = null;
+    console.log('Market Closed');
+    return;
+  }
+
+  if (istHrs >= 15) {
+    globalvar.marketoff = true;
+    globalvar.wviewfile = null;
+    console.log('Market Closed');
+    return;
+  }
+  globalvar.marketoff = false;
   if (niftyopen == 0) {
     getnowSP()
       .then
@@ -277,9 +309,15 @@ setInterval(function () {
   //latestspdata = [];
   if (niftyopen > 0) {
     //console.log('before fetch nse data ');
+    if (globalvar.wviewfile == null) {
+      var dt = new Date();
+      var fdate = moment(dt).utcOffset("+05:30").format('DD-MM-YYYY');
+      var filename = "writersview " + fdate.toString() + ".json";
+      globalvar.wviewfile = path.join(globalvar.BASE_DATA_DIR, filename);
+    }
     fetchNSEData();
   }
-}, 90000);
+}, 60000);
 
 module.exports = {
   router: router,
