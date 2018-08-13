@@ -13,7 +13,7 @@ var moment = require('moment');
 const readLastLine = require('read-last-line');
 
 var globalvar = require('./common/globalvar');
-var niftyoptiondata = require('./routes/niftyoptiondata.js');
+var niftyoptions = require('./routes/niftyoptiondata.js');
 var wview = require('./routes/writersview.js');
 
 const html = path.join(__dirname, 'build');
@@ -33,7 +33,15 @@ app.use('/writersview', function (req, res, next) {
     next();
 });
 
+app.use('/niftyoptiondata', function (req, res, next) {
+    console.log("A new niftyoptiondata request received at " + Date.now());
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers , *");
+    next();
+});
+
 app.use('/writersview', wview);
+app.use('/niftyoptiondata', niftyoptions);
 
 var port = process.env.PORT || 8080;// 5000;
 
@@ -115,7 +123,8 @@ var server = app.listen(port, function () {
     //console.log('\u0007');    
     //process.stdout.write('\x07');
     // beep(5);
-    console.log('listening ', globalvar.BASE_DATA_DIR);
+
+    console.log('listening ', port);
     if (!fs.existsSync(globalvar.BASE_DATA_DIR)) {
         fs.mkdirSync(globalvar.BASE_DATA_DIR);
         console.log('dir created ', globalvar.BASE_DATA_DIR);

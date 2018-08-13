@@ -255,22 +255,22 @@ function CalculateCOI(latestspdata) {
   item.calloi = totalCallOI;
   item.putoi = totalPutOI;
   // COMMENT it
-  console.log('III ', i % 2);
-  if (i > 5 && i % 2 == 0) {
-    item.calloi = item.calloi - i;
-  }
-  else
-    item.calloi = item.calloi + i;
+  // console.log('III ', i % 2);
+  // if (i > 5 && i % 2 == 0) {
+  //   item.calloi = item.calloi - i;
+  // }
+  // else
+  //   item.calloi = item.calloi + i;
 
-  i++;
-  item.calloi = parseFloat(item.calloi).toFixed(2);
-  console.log('modified call OI ', item.calloi);
+  // i++;
+  // item.calloi = parseFloat(item.calloi).toFixed(2);
+  // console.log('modified call OI ', item.calloi);
   //
   // Calculate CALL OI from LOW
-  item.calloifromlow = 0.00;
-  item.calloifromhigh = 0.00;
-  item.putoifromlow = 0.00;
-  item.putoifromhigh = 0.00;
+  item.calloifromlow = 0;
+  item.calloifromhigh = 0;
+  item.putoifromlow = 0;
+  item.putoifromhigh = 0;
   if (todayswviewdata.length > 0) {
     //Find lowest item from oi array
     var minoi = Math.min.apply(null, todayswviewdata.map(function (item) {
@@ -279,7 +279,14 @@ function CalculateCOI(latestspdata) {
     var maxoi = Math.max.apply(null, todayswviewdata.map(function (item) {
       return item.calloi;
     }));
-    console.log('min and max call oi : ', minoi, maxoi);
+    if (item.calloifromlow == undefined)
+      item.calloifromlow = 0;
+
+    if (item.calloifromhi == undefined)
+      item.calloifromhi = 0;
+    
+     console.log('min and max call oi : ', minoi, maxoi, item.calloifromlow, item.calloifromhi);
+      
     if (item.calloi > minoi) {
       item.calloifromlow = item.calloi - minoi;
       item.calloifromlow = item.calloifromlow.toFixed(2);

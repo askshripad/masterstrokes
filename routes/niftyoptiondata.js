@@ -24,6 +24,9 @@ var niftydata = 'niftydata';
 
 //var BASE_DATA_DIR = path.join(__dirname, '..', '..', niftydata);
 var latestspdata = [];
+var niftysp1data = { sp: 0, data: [] };
+var niftysp2data = { sp: 0, data: [] };
+var niftysp3data = { sp: 0, data: [] };
 var niftyopen = 0;
 //var nifty50 = { open: null, high: null, low: null, close: null };
 
@@ -79,6 +82,18 @@ function parseoptiondata(item, sp) {
 
   item.sp = Number(item.sp);
   latestspdata.push(item);
+  if (item.sp == niftysp1data.sp) {
+    console.log('Nifty SP data ', niftysp1data.sp);
+    niftysp1data.data.push(item);
+  }
+  else if (item.sp == niftysp2data.sp) {
+    console.log('Nifty SP data ', niftysp2data.sp);
+    niftysp2data.data.push(item);
+  }
+  else if (item.sp == niftysp3data.sp) {
+    console.log('Nifty SP data ', niftysp3data.sp);
+    niftysp3data.data.push(item);
+  }
 
   var filename = "sp" + sp.toString() + ".json";
   filetowrite = path.join(globalvar.BASE_DATA_DIR, filename);
@@ -273,30 +288,20 @@ setInterval(function () {
   var now = new Date();
   var istHrs = moment(now).utcOffset("+05:30").format('HH');
   var istmins = moment(now).utcOffset("+05:30").format('mm');
-  //istHrs = Number(istHrs);
-  //istmins = Number(istmins);
-  //var currentTime = moment(now).utcOffset("+05:30");    // e.g. 11:00 pm
-  //amIBetween = currentTime.isBetween(startTime, endTime);
-  //console.log(amIBetween);
-  //i++;
-  // if (amIBetween == false) {
+
+  // if (istHrs == 9 && istmins < 30) {
   //   globalvar.marketoff = true;
+  //   globalvar.wviewfile = null;
   //   console.log('Market Closed');
   //   return;
   // }
-  if (istHrs == 9 && istmins < 30) {
-    globalvar.marketoff = true;
-    globalvar.wviewfile = null;
-    console.log('Market Closed');
-    return;
-  }
 
-  if (istHrs >= 15) {
-    globalvar.marketoff = true;
-    globalvar.wviewfile = null;
-    console.log('Market Closed');
-    return;
-  }
+  // if (istHrs >= 15) {
+  //   globalvar.marketoff = true;
+  //   globalvar.wviewfile = null;
+  //   console.log('Market Closed');
+  //   return;
+  // }
   globalvar.marketoff = false;
   if (niftyopen == 0) {
     getnowSP()
@@ -304,6 +309,15 @@ setInterval(function () {
       (indexNifty => {
         niftyopen = Math.round(Number(indexNifty[0]));
         console.log('Todays Nifty open ', niftyopen);
+
+        var atm1 = niftyopen % 100;
+        var firstsp = niftyopen - atm1;
+        niftysp1data.sp = firstsp;
+        var secondsp = firstsp + 100;
+        niftysp2data.sp = secondsp;
+        var thirdsp = secondsp + 100;
+        niftysp3data.sp = thirdsp;
+        console.log('Nifty SPs  ', niftysp1data.sp, niftysp2data.sp, niftysp3data.sp);
       });
   }
   //latestspdata = [];
@@ -319,7 +333,25 @@ setInterval(function () {
   }
 }, 60000);
 
-module.exports = {
-  router: router,
-  latestspdata: latestspdata
-}
+
+router.post('/data', function (req, res) {
+
+  var result = [];
+  var dt = new Date();
+  console.log('inside nifty option data..... ', req.body.fetchall);
+  if (req.body.fetchall == false) {
+    res.send({ data1: niftysp1data.data.pop(), data2: niftysp2data.data.pop(), data3: niftysp3data.data.pop(), makertoff: globalvar.marketoff });
+  }
+  else {
+    res.send({ data1: niftysp1data.data, data2: niftysp2data.data, data3: niftysp3data.data, makertoff: globalvar.marketoff });
+  }
+  return;
+
+});
+
+
+// module.exports = {
+//   router: router,
+//   latestspdata: latestspdata
+// }
+module.exports = router;
