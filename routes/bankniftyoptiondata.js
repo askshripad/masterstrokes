@@ -10,25 +10,16 @@ var path = require('path'),
 var lodash = require('lodash');
 var moment = require('moment');
 
-var wviewfunctions = require('../common/wviewfunctions');
 var globalvar = require('../common/globalvar');
-var banknifty = require('./bankniftyoptiondata');
-var dt = new Date();
 
-// var niftyurl = "https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp";
-// var optionUrl = "https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp";
-// var moneyControlURL = 'https://www.moneycontrol.com/indian-indices/nifty-50-9.html';
+var dt = new Date();
 var output = [];
 
-var niftydata = 'niftydata';
-
-//var BASE_DATA_DIR = path.join(__dirname, '..', '..', niftydata);
-var latestspdata = [];
-var niftysp1data = { sp: 0, data: [] };
-var niftysp2data = { sp: 0, data: [] };
-var niftysp3data = { sp: 0, data: [] };
-var niftyopen = 0;
-//var nifty50 = { open: null, high: null, low: null, close: null };
+var latestbspdata = [];
+var bankniftysp1data = { sp: 0, data: [] };
+var bankniftysp2data = { sp: 0, data: [] };
+var bankniftysp3data = { sp: 0, data: [] };
+var bankniftyopen = 0;
 
 router.get('/test', function (req, res) {
   res.json({
@@ -82,28 +73,31 @@ function parseoptiondata(item, sp) {
 
   item.sp = Number(item.sp);
   latestspdata.push(item);
-  if (item.sp == niftysp1data.sp) {
-    console.log('Nifty SP data ', niftysp1data.sp);
-    niftysp1data.data.push(item);
+  if (item.sp == bankniftysp1data.sp) {
+    console.log('Bank Nifty SP data ', bankniftysp1data.sp);
+    bankniftysp1data.data.push(item);
   }
-  else if (item.sp == niftysp2data.sp) {
-    console.log('Nifty SP data ', niftysp2data.sp);
-    niftysp2data.data.push(item);
+  else if (item.sp == bankniftysp2data.sp) {
+    console.log('Bank Nifty SP data ', bankniftysp2data.sp);
+    bankniftysp2data.data.push(item);
   }
-  else if (item.sp == niftysp3data.sp) {
-    console.log('Nifty SP data ', niftysp3data.sp);
-    niftysp3data.data.push(item);
+  else if (item.sp == bankniftysp3data.sp) {
+    console.log('Bank Nifty SP data ', bankniftysp3data.sp);
+    bankniftysp3data.data.push(item);
+  }
+  else {
+    console.log('Not saving other Bank Nifty SP');
+    return;
   }
 
-  var filename = "sp" + sp.toString() + ".json";
+  var filename = "bsp" + sp.toString() + ".json";
   filetowrite = path.join(globalvar.BASE_DATA_DIR, filename);
-  //console.log('latestspdata ', latestspdata);
   AppendDataToJsonFile(item, filetowrite);
 }
-function fetchNSEData(res) {
+function fetchbankniftyData(res) {
   latestspdata = [];
   osmosis
-    .get(globalvar.niftyurl)
+    .get(globalvar.bankniftyurl)
     .find('//*[@id="octable"]//tr')
     .set({
       sp: 'td[12]',
@@ -121,19 +115,16 @@ function fetchNSEData(res) {
       item.date = moment(dt).format("DD-MM-YYYY");
       item.time = newtime;
       var sp = Number(item.sp);
-      var lowerspRange = niftyopen - 200;
-      var higherspRange = niftyopen + 200;
-      //console.log('Todays SP range ' + lowerspRange + higherspRange);
+      var lowerspRange = bankniftyopen - 200;
+      var higherspRange = bankniftyopen + 200;
       if (!IsNullorUndefined(sp) && sp >= lowerspRange && sp <= higherspRange) {
-        ///  appendALLDataToJsonFile(item);
         output.push(item);
         parseoptiondata(item, sp)
         //}
       }
     })
     .done(function () {
-      console.log('data scrapping done!!');
-      wviewfunctions.CheckWritersView(latestspdata);
+      console.log('Bank Nifty data scrapping done!!');
     });
   //createOptionDataOutPutFile(output);
 
@@ -157,11 +148,11 @@ function AppendDataToJsonFile(obj, filename) {
 
 function getnowSP() {
   return new Promise((resolve, reject) => {
-    osmosis.get(globalvar.moneyControlURL)
+    osmosis.get(globalvar.moneyControlBankNiftyURL)
       .find('//*[@id="mc_mainWrapper"]')
       .set({
-        nifty: 'div[3]/div[1]/div[4]/div[1]/strong',
         open: '//div[@id="mc_mainWrapper"]//tr[2]/td[1][@class="bggry02 br01"]:html',
+        ////*[@id="mc_mainWrapper"]/div[3]/div[1]/div[5]/div[1]/div[1]/table/tbody/tr[2]/td[1]/
         high: '//div[@id="mc_mainWrapper"]//tr[2]/td[2]:html',
         low: '//div[@id="mc_mainWrapper"]//tr[3]/td[2]:html',
         prevClose: '//div[@id="mc_mainWrapper"]//tr[3]/td[1]:html',
@@ -169,41 +160,40 @@ function getnowSP() {
       })
       .data
       (item => {
-        //console.log('II ', item);
         var arrNiftyDT = [];
         if (item.open != null || item.open != undefined) {
           var n = item.open.indexOf("</span>");
           var open = item.open.substring(n + 7);
           open = open.trim();
           open = open.split(',').join('');
-          console.log('open ', open);
+          console.log('bank nifty open ', open);
           arrNiftyDT.push(open);
-          globalvar.nifty50.open = open;
+          globalvar.banknifty.open = open;
         }
         if (item.high != null || item.high != undefined) {
           var n = item.high.indexOf("</span>");
           var high = item.high.substring(n + 7);
           high = high.trim();
           high = high.split(',').join('');
-          console.log('high ', high);
+          console.log('bank nifty high ', high);
           arrNiftyDT.push(high);
-          globalvar.nifty50.high = high;
+          globalvar.banknifty.high = high;
         }
         if (item.low != null || item.low != undefined) {
           var n = item.low.indexOf("</span>");
           var low = item.low.substring(n + 7);
           low = low.trim();
           low = low.split(',').join('');
-          console.log('low ', low);
+          console.log('bank nifty low ', low);
           arrNiftyDT.push(low);
-          globalvar.nifty50.low = low;
+          globalvar.banknifty.low = low;
         }
         if (item.nifty != null || item.nifty != undefined) {
           item.nifty = item.nifty.trim();
           item.nifty = item.nifty.split(',').join('');
-          console.log('close ', item.nifty);
+          console.log('bank nifty close ', item.nifty);
           arrNiftyDT.push(item.nifty);
-          globalvar.nifty50.close = item.nifty;
+          globalvar.banknifty.close = item.nifty;
         }
 
         arrNiftyDT.push(item.dateTime);
@@ -211,58 +201,22 @@ function getnowSP() {
         if (!IsNullorUndefined(arrNiftyDT)) {
           resolve(arrNiftyDT); // fulfilled
         } else {
-          var reason = new Error('item.nifty is null');
+          var reason = new Error('Bank nifty is null');
           reject(reason); // reject
         }
       })
   })
 }
 
-exports.getATM = function () {
-  return new Promise((resolve, reject) => {
-    getnowSP()
-      .then
-      (indexNifty => {
-        //console.log("Nifty:"+indexNifty); //Current Strike price 
-        getStrikePriceArr()
-          .then(
-          data => {
-            //console.log('data ', data);
-            var curr = data[0];
-            var diff = Math.abs(indexNifty[0] - curr);
-            //console.log('diff ', diff);
-            for (var val = 0; val < data.length; val++) {
-              var newdiff = Math.abs(indexNifty[0] - data[val]);
-              if (newdiff < diff) {
-                diff = newdiff;
-                curr = data[val];
-              }
-            }
-            if (!IsNullorUndefined(curr)) {
-              //console.log(curr);
-              //console.log(indexNifty[1]);
-              var atmDT = [];
-              atmDT.push(curr);
-              atmDT.push(indexNifty[1]);
-              resolve(atmDT); // fulfilled
-            } else {
-              var reason = new Error('curr is null');
-              reject(reason); // reject
-            }
-          })
-      })
-  }
-  );
-}
 
 function getStrikePriceArr() {
   return new Promise((resolve, reject) => {
-    var niftySP = [];
-    var upperlimit = Number(globalvar.nifty50.open) + 200;
-    var lowerlimit = Number(globalvar.nifty50.open) - 200;
+    var bankniftySP = [];
+    var upperlimit = Number(globalvar.banknifty.open) + 100;
+    var lowerlimit = Number(globalvar.banknifty.open) - 100;
     //console.log('upper limit ', upperlimit);
     //console.log('lower limit ', lowerlimit);
-    osmosis.get(globalvar.niftyurl)
+    osmosis.get(globalvar.bankniftyurl)
       .find('//table[@id="octable"]//tr')
       .set({
         strikePrice: 'td[12]'
@@ -272,8 +226,8 @@ function getStrikePriceArr() {
         var sp = Number(item.strikePrice);
 
         if (!IsNullorUndefined(sp) && sp >= lowerlimit && sp <= upperlimit) {
-          niftySP.push(item.strikePrice);
-          //console.log('niftySP ', niftySP);
+          bankniftySP.push(item.strikePrice);
+          console.log('Bank NiftySP ', niftySP);
         }
       })
       .done(() => resolve(niftySP));
@@ -282,59 +236,32 @@ function getStrikePriceArr() {
 var i = 20;
 var startTime = moment('09:45', "HH:mm");
 var endTime = moment('18:59', "HH:mm");
-setInterval(function () {
-  // Do something every 5 seconds
-  console.log('Looking for new Nifty data [ALL SPS]....');
-  var now = new Date();
-  var istHrs = moment(now).utcOffset("+05:30").format('HH');
-  var istmins = moment(now).utcOffset("+05:30").format('mm');
 
-  // if (istHrs == 9 && istmins < 30) {
-  //   globalvar.marketoff = true;
-  //   globalvar.wviewfile = null;
-  //   console.log('Market Closed');
-  //   return;
-  // }
-
-  // if (istHrs >= 15) {
-  //   globalvar.marketoff = true;
-  //   globalvar.wviewfile = null;
-  //   console.log('Market Closed');
-  //   return;
-  // }
+updateBankNifty = function () {
+  console.log('Updaing Bank Nifty data....');
   globalvar.marketoff = false;
-  if (niftyopen == 0) {
+  if (bankniftyopen == 0) {
     getnowSP()
       .then
       (indexNifty => {
-        niftyopen = Math.round(Number(indexNifty[0]));
-        console.log('Todays Nifty open ', niftyopen);
+        bankniftyopen = Math.round(Number(indexNifty[0]));
+        console.log('Todays Bank Nifty open ', bankniftyopen);
 
-        var atm1 = niftyopen % 100;
-        var firstsp = niftyopen - atm1;
-        niftysp1data.sp = firstsp;
+        var atm1 = bankniftyopen % 100;
+        var firstsp = bankniftyopen - atm1;
+        bankniftysp1data.sp = firstsp;
         var secondsp = firstsp + 100;
-        niftysp2data.sp = secondsp;
+        bankniftysp2data.sp = secondsp;
         var thirdsp = secondsp + 100;
-        niftysp3data.sp = thirdsp;
-        console.log('Nifty SPs  ', niftysp1data.sp, niftysp2data.sp, niftysp3data.sp);
+        bankniftysp3data.sp = thirdsp;
+        console.log('Bank Nifty SPs  ', bankniftysp1data.sp, bankniftysp2data.sp, bankniftysp3data.sp);
       });
   }
   //latestspdata = [];
-  if (niftyopen > 0) {
-    //console.log('before fetch nse data ');
-    if (globalvar.wviewfile == null) {
-      var dt = new Date();
-      var fdate = moment(dt).utcOffset("+05:30").format('DD-MM-YYYY');
-      var filename = "writersview " + fdate.toString() + ".json";
-      globalvar.wviewfile = path.join(globalvar.BASE_DATA_DIR, filename);
-    }
-    fetchNSEData();
+  if (bankniftyopen > 0) {
+    fetchbankniftyData();
   }
-
-  banknifty.updateBankNifty();
-
-}, 60000);
+}
 
 
 router.post('/data', function (req, res) {
@@ -344,21 +271,24 @@ router.post('/data', function (req, res) {
   console.log('inside nifty option data..... ', req.body.fetchall);
   if (req.body.fetchall == false) {
     res.send({
-      data1: niftysp1data.data[niftysp1data.data.length - 1],
-      data2: niftysp2data.data[niftysp2data.data.length - 1],
-      data3: niftysp3data.data[niftysp3data.data.length - 1], makertoff: globalvar.marketoff
+      data1: bankniftysp1data.data[bankniftysp1data.data.length - 1],
+      data2: bankniftysp2data.data[bankniftysp2data.data.length - 1],
+      data3: bankniftysp3data.data[bankniftysp3data.data.length - 1], makertoff: globalvar.marketoff
     });
   }
   else {
-    res.send({ data1: niftysp1data.data, data2: niftysp2data.data, data3: niftysp3data.data, makertoff: globalvar.marketoff });
+    res.send({
+      data1: bankniftysp1data.data, data2: bankniftysp2data.data,
+      data3: bankniftysp3data.data, makertoff: globalvar.marketoff
+    });
   }
   return;
 
 });
 
 
-// module.exports = {
-//   router: router,
-//   latestspdata: latestspdata
-// }
-module.exports = router;
+module.exports = {
+  router: router,
+  updateBankNifty: updateBankNifty
+}
+//module.exports = router;

@@ -15,6 +15,7 @@ const readLastLine = require('read-last-line');
 var globalvar = require('./common/globalvar');
 var niftyoptions = require('./routes/niftyoptiondata.js');
 var wview = require('./routes/writersview.js');
+var banknifty = require('./routes/bankniftyoptiondata.js');
 
 const html = path.join(__dirname, 'build');
 var dt = new Date();
@@ -40,8 +41,16 @@ app.use('/niftyoptiondata', function (req, res, next) {
     next();
 });
 
+app.use('/bankniftydata', function (req, res, next) {
+    console.log("A new Bank Nifty request received at " + Date.now());
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers , *");
+    next();
+});
+
 app.use('/writersview', wview);
 app.use('/niftyoptiondata', niftyoptions);
+app.use('/bankniftydata', banknifty.router);
 
 var port = process.env.PORT || 8080;// 5000;
 

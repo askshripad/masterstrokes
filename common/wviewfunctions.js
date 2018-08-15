@@ -284,9 +284,9 @@ function CalculateCOI(latestspdata) {
 
     if (item.calloifromhi == undefined)
       item.calloifromhi = 0;
-    
-     console.log('min and max call oi : ', minoi, maxoi, item.calloifromlow, item.calloifromhi);
-      
+
+    console.log('min and max call oi : ', minoi, maxoi, item.calloifromlow, item.calloifromhi);
+
     if (item.calloi > minoi) {
       item.calloifromlow = item.calloi - minoi;
       item.calloifromlow = item.calloifromlow.toFixed(2);
