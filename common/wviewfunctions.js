@@ -252,8 +252,8 @@ function CalculateCOI(latestspdata) {
   //console.log('OIII ', item.calloi, item.putoi);
   item.callcoi = totalCallCOI;
   item.putcoi = totalPutCOI;
-  item.calloi = totalCallOI;
-  item.putoi = totalPutOI;
+  //item.calloi = totalCallOI;
+  //item.putoi = totalPutOI;
   // COMMENT it
   // console.log('III ', i % 2);
   // if (i > 5 && i % 2 == 0) {
@@ -266,7 +266,43 @@ function CalculateCOI(latestspdata) {
   // item.calloi = parseFloat(item.calloi).toFixed(2);
   // console.log('modified call OI ', item.calloi);
   //
-  // Calculate CALL OI from LOW
+
+  console.log('current day ', now.getDate());
+  if (now.getDate() <= 15) { //OTM
+    console.log('OTM');
+    item.callsp = callarrSPs[1];
+    item.putsp = putarrSPs[2];
+    item.callltp = arrCallLtp[1];
+    item.putltp = arrPutLtp[2];
+
+    item.calloi = arrCallOI[1];
+    item.putoi = arrPutOI[2];
+  }
+  else if (now.getDate() > 15 && now.getDate() <= 25) { //ATM
+    console.log('ATM');
+    item.callsp = callarrSPs[0];
+    item.putsp = putarrSPs[0];
+    item.callltp = arrCallLtp[0];
+    item.putltp = arrPutLtp[0];
+
+    item.calloi = arrCallOI[0];
+    item.putoi = arrPutOI[0];
+  }
+  else if (now.getDate() > 25 && now.getDate() <= 31) { //ITM
+
+    item.callsp = callarrSPs[2];
+    item.putsp = putarrSPs[1];
+    item.callltp = arrCallLtp[2];
+    item.putltp = arrPutLtp[1];
+
+    item.calloi = arrCallOI[2];
+    item.putoi = arrPutOI[1];
+    console.log('ITM', item.callltp, item.putltp);
+  }
+
+
+
+  //// Calculate CALL OI from LOW
   item.calloifromlow = 0;
   item.calloifromhigh = 0;
   item.putoifromlow = 0;
@@ -320,36 +356,14 @@ function CalculateCOI(latestspdata) {
   console.log('CALL OI DIff high low ', item.calloifromhigh, item.calloifromlow);
   console.log('PUT OI DIff high low ', item.putoifromhigh, item.putoifromlow);
   //
-  console.log('current day ', now.getDate());
-  if (now.getDate() <= 10) { //OTM
-    console.log('OTM');
-    item.callsp = callarrSPs[1];
-    item.putsp = putarrSPs[2];
-    item.callltp = arrCallLtp[1];
-    item.putltp = arrPutLtp[2];
-  }
-  else if (now.getDate() > 10 && now.getDate() <= 20) { //ATM
-    console.log('ATM');
-    item.callsp = callarrSPs[0];
-    item.putsp = putarrSPs[0];
-    item.callltp = arrCallLtp[0];
-    item.putltp = arrPutLtp[0];
-  }
-  else if (now.getDate() > 20 && now.getDate() <= 31) { //ITM
-
-    item.callsp = callarrSPs[2];
-    item.putsp = putarrSPs[1];
-    item.callltp = arrCallLtp[2];
-    item.putltp = arrPutLtp[1];
-    console.log('ITM', item.callltp, item.putltp);
-  }
-
   //niftyoptiondata.latestspdata = [];
   console.log('Appending wview data ');
   todayswviewdata.push(item);
   AppendDataToJsonFile(item, globalvar.wviewfile);
   latestspdata = null;
   //
+  if (globalvar.breakoutData.action == "EXIT" || globalvar.breakoutData.action == "BOOK PROFIT")
+    return;
 
   if (globalvar.breakoutData.action == null) {
     LookForSignal(currtime, totalCallCOI, totalPutCOI, item.callsp, item.putsp,
@@ -413,3 +427,4 @@ function AppendDataToJsonFile(obj, filename) {
 }
 
 exports.CheckWritersView = CheckWritersView;
+exports.todayswviewdata = todayswviewdata;

@@ -18,14 +18,15 @@ var readline = require('readline');
 
 var dt = new Date();
 var fdate = moment(dt).format("DD-MM-YYYY");
-var filename = "writersview " + fdate.toString() + ".json";
+//var filename = "writersview " + fdate.toString() + ".json";
+var filename = "writersview.json";
 var wviewfile = path.join(globalvar.BASE_DATA_DIR, filename);
 
 //var breakoutData = { Recotime: null, CurrLTP: null, StrikePrice: null, ROI: null, Action: null };
 
 //var BASE_DATA_DIR = path.join(__dirname, '..', 'writersview');
 var fdate = moment(dt).format("DD-MM-YYYY");
-var filename = "writersview " + fdate.toString() + ".json";
+var filename = "writersview.json";
 var filetowrite = path.join(globalvar.BASE_DATA_DIR, filename);
 /*const puppeteer = require('puppeteer');
  const Xray=require('x-ray');
@@ -54,7 +55,7 @@ router.post('/data', function (req, res) {
       var data = JSON.parse(line);
       result.push(data);
       console.log('latest wview data ', data);
-      res.send({ data: result, breakout: breakoutData, offset: offset, makertoff: globalvar.marketoff });
+      res.send({ data: result, breakout: breakoutData, offset: offset, nifty50: globalvar.nifty50, makertoff: globalvar.marketoff });
     }).catch(function (err) {
 
       console.log(err.message);
@@ -64,7 +65,7 @@ router.post('/data', function (req, res) {
   else {
     fs.readFile(wviewfile, 'utf-8', (err, file) => {
       if (file == null || file == undefined) {
-        res.send({ data: null, breakout: breakoutData, offset: offset, makertoff: globalvar.marketoff });
+        res.send({ data: null, breakout: breakoutData, offset: offset, nifty50: globalvar.nifty50, makertoff: globalvar.marketoff });
         return;
       }
       const lines = file.split('\n')
@@ -82,7 +83,7 @@ router.post('/data', function (req, res) {
         if (index == (lines.length - 1)) {
           //console.log('parsing last line ', line);
 
-          res.send({ data: result.reverse(), breakout: breakoutData, offset: offset, makertoff: globalvar.marketoff });
+          res.send({ data: result.reverse(), breakout: breakoutData, offset: offset, nifty50: globalvar.nifty50, makertoff: globalvar.marketoff });
         }
       }
     });

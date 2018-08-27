@@ -16,6 +16,7 @@ var globalvar = require('./common/globalvar');
 var niftyoptions = require('./routes/niftyoptiondata.js');
 var wview = require('./routes/writersview.js');
 var banknifty = require('./routes/bankniftyoptiondata.js');
+var bankniftyanalytics = require('./routes/bankniftyanalytics.js');
 
 const html = path.join(__dirname, 'build');
 var dt = new Date();
@@ -48,9 +49,17 @@ app.use('/bankniftydata', function (req, res, next) {
     next();
 });
 
+app.use('/bankniftyanalytics', function (req, res, next) {
+    console.log("A new Bank Nifty Analytics request received at " + Date.now());
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers , *");
+    next();
+});
+
 app.use('/writersview', wview);
-app.use('/niftyoptiondata', niftyoptions);
+app.use('/niftyoptiondata', niftyoptions.router);
 app.use('/bankniftydata', banknifty.router);
+app.use('/bankniftyanalytics', bankniftyanalytics.router);
 
 var port = process.env.PORT || 8080;// 5000;
 
@@ -137,21 +146,34 @@ var server = app.listen(port, function () {
     if (!fs.existsSync(globalvar.BASE_DATA_DIR)) {
         fs.mkdirSync(globalvar.BASE_DATA_DIR);
         console.log('dir created ', globalvar.BASE_DATA_DIR);
+        niftyoptions.CheckForOptionData();
     }
     else {
         fs.readdir(globalvar.BASE_DATA_DIR, (err, files) => {
             if (err)
                 console.log('error in readdir ', err);
             else {
-                for (const file of files) {
+                //for (const file of files) {
+                for (let index = 0; index < files.length; index++) {
+                    var file = files[index];
                     fs.unlink(path.join(globalvar.BASE_DATA_DIR, file), err => {
                         if (err)
                             console.log('error while deleting files ', err);;
                     });
                 }
             }
+
+            console.log('OLD FILES DELETED');
+            console.log('NEW DAY STARTED .............');
+            niftyoptions.CheckForOptionData();
+           
         });
     }
+
+    bankniftyanalytics.FetchOpen();
+
+
+
 });
 
 

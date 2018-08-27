@@ -1,3 +1,4 @@
+
 var express = require('express');
 var router = express.Router();
 
@@ -13,14 +14,16 @@ var moment = require('moment');
 var wviewfunctions = require('../common/wviewfunctions');
 var globalvar = require('../common/globalvar');
 var banknifty = require('./bankniftyoptiondata');
+var bankniftyanalytics = require('./bankniftyanalytics');
 var dt = new Date();
-
+var updateonce = false;
 // var niftyurl = "https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp";
 // var optionUrl = "https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp";
 // var moneyControlURL = 'https://www.moneycontrol.com/indian-indices/nifty-50-9.html';
-var output = [];
+//var output = [];
 
 var niftydata = 'niftydata';
+
 
 //var BASE_DATA_DIR = path.join(__dirname, '..', '..', niftydata);
 var latestspdata = [];
@@ -117,16 +120,18 @@ function fetchNSEData(res) {
     .data(item => {
       //console.log('new item', item);
       var dt = new Date();
-      var newtime = moment(dt).format("HH-mm-ss");
-      item.date = moment(dt).format("DD-MM-YYYY");
-      item.time = newtime;
+      //var newtime = moment(dt).format("HH-mm-ss");
+      var newtime = moment(dt).utcOffset("+05:30").format();//moment.utc().format('DD-MM-YYYY HH:mm:ss');
+      //var currtime = ist;
+      item.date = moment(dt).utcOffset("+05:30").format("DD-MM-YYYY");
+      item.time = moment(dt).utcOffset("+05:30").format("HH:mm");
       var sp = Number(item.sp);
       var lowerspRange = niftyopen - 200;
       var higherspRange = niftyopen + 200;
       //console.log('Todays SP range ' + lowerspRange + higherspRange);
       if (!IsNullorUndefined(sp) && sp >= lowerspRange && sp <= higherspRange) {
         ///  appendALLDataToJsonFile(item);
-        output.push(item);
+        //output.push(item);
         parseoptiondata(item, sp)
         //}
       }
@@ -285,23 +290,35 @@ var endTime = moment('18:59', "HH:mm");
 setInterval(function () {
   // Do something every 5 seconds
   console.log('Looking for new Nifty data [ALL SPS]....');
-  var now = new Date();
-  var istHrs = moment(now).utcOffset("+05:30").format('HH');
-  var istmins = moment(now).utcOffset("+05:30").format('mm');
+  if (globalvar.IsMarketClosed()) {
+    globalvar.stopFetchingData = true;
+    return;
+  }
 
-  // if (istHrs == 9 && istmins < 30) {
-  //   globalvar.marketoff = true;
-  //   globalvar.wviewfile = null;
-  //   console.log('Market Closed');
-  //   return;
-  // }
+  if (globalvar.stopFetchingData) {
+    globalvar.stopFetchingData = false;
+    latestspdata = [];
+    niftysp1data = { sp: 0, data: [] };
+    niftysp2data = { sp: 0, data: [] };
+    niftysp3data = { sp: 0, data: [] };
+    niftyopen = 0;
+    banknifty.latestbspdata = [];
+    banknifty.bankniftysp1data = { sp: 0, data: [] };
+    banknifty.bankniftysp2data = { sp: 0, data: [] };
+    banknifty.bankniftysp3data = { sp: 0, data: [] };
+    wviewfunctions.todayswviewdata = [];
+  }
+  CheckForOptionData();
+  if (!updateonce) {
+    updateonce = true;
+    bankniftyanalytics.updatebankniftyData();
+  }
 
-  // if (istHrs >= 15) {
-  //   globalvar.marketoff = true;
-  //   globalvar.wviewfile = null;
-  //   console.log('Market Closed');
-  //   return;
-  // }
+}, 60000);
+
+
+
+function CheckForOptionData() {
   globalvar.marketoff = false;
   if (niftyopen == 0) {
     getnowSP()
@@ -326,7 +343,8 @@ setInterval(function () {
     if (globalvar.wviewfile == null) {
       var dt = new Date();
       var fdate = moment(dt).utcOffset("+05:30").format('DD-MM-YYYY');
-      var filename = "writersview " + fdate.toString() + ".json";
+      //var filename = "writersview " + fdate.toString() + ".json";
+      var filename = "writersview.json";
       globalvar.wviewfile = path.join(globalvar.BASE_DATA_DIR, filename);
     }
     fetchNSEData();
@@ -334,9 +352,7 @@ setInterval(function () {
 
   banknifty.updateBankNifty();
 
-}, 60000);
-
-
+}
 router.post('/data', function (req, res) {
 
   var result = [];
@@ -357,8 +373,9 @@ router.post('/data', function (req, res) {
 });
 
 
-// module.exports = {
-//   router: router,
-//   latestspdata: latestspdata
-// }
-module.exports = router;
+
+module.exports = {
+  router: router,
+  CheckForOptionData: CheckForOptionData
+}
+//module.exports = router;

@@ -1,0 +1,38 @@
+[
+  {
+    "url": "https://www.moneycontrol.com/india/stockpricequote/banks-public-sector/statebankindia/SBI",
+    "nseurl": "https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=238&symbol=SBIN&symbol=sbin&instrument=OPTSTK&date=-&segmentLink=17&segmentLink=17",
+    "quote": "STATE BANK OF INDIA",
+    "SPDiff": 5
+  },
+  {
+    "url": "https://www.moneycontrol.com/india/stockpricequote/banks-private-sector/hdfcbank/HDF01",
+    "nseurl": "https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=797&symbol=HDFCBANK&symbol=hdfc%20bank&instrument=OPTSTK&date=-&segmentLink=17&segmentLink=17",
+    "quote": "HDFC BANK",
+    "SPDiff": 20
+  },
+  {
+    "url": "https://www.moneycontrol.com/india/stockpricequote/banks-private-sector/icicibank/ICI02",
+    "nseurl": "https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=1606&symbol=ICICIBANK&symbol=icicibank&instrument=OPTSTK&date=-&segmentLink=17&segmentLink=17",
+    "quote": "ICICI BANK",
+    "SPDiff": 10
+  },
+  {
+    "url": "https://www.moneycontrol.com/india/stockpricequote/banks-private-sector/kotakmahindrabank/KMB",
+    "nseurl": "https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=1118&symbol=KOTAKBANK&symbol=kotak%20mahindra%20bank&instrument=OPTSTK&date=-&segmentLink=17&segmentLink=17",
+    "quote": "KOTAK BANK",
+    "SPDiff": 20
+  },
+  {
+    "url": "https://www.moneycontrol.com/india/stockpricequote/banks-private-sector/axisbank/AB16",
+    "nseurl": "https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=1693&symbol=AXISBANK&symbol=axis%20bank&instrument=OPTSTK&date=-&segmentLink=17&segmentLink=17",
+    "quote": "AXIS BANK",
+    "SPDiff": 10
+  },
+  {
+    "url": "https://www.moneycontrol.com/india/stockpricequote/banks-private-sector/yesbank/YB",
+    "nseurl": "https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=2304&symbol=YESBANK&symbol=yes%20bank&instrument=OPTSTK&date=-&segmentLink=17&segmentLink=17",
+    "quote": "YES BANK",
+    "SPDiff": 10
+  }
+]

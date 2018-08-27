@@ -112,8 +112,10 @@ function fetchbankniftyData(res) {
       //console.log('new item', item);
       var dt = new Date();
       var newtime = moment(dt).format("HH-mm-ss");
-      item.date = moment(dt).format("DD-MM-YYYY");
-      item.time = newtime;
+      //item.date = moment(dt).format("DD-MM-YYYY");
+      //item.time = newtime;
+      item.date = moment(dt).utcOffset("+05:30").format("DD-MM-YYYY");
+      item.time = moment(dt).utcOffset("+05:30").format("HH:mm");
       var sp = Number(item.sp);
       var lowerspRange = bankniftyopen - 200;
       var higherspRange = bankniftyopen + 200;
@@ -289,6 +291,10 @@ router.post('/data', function (req, res) {
 
 module.exports = {
   router: router,
-  updateBankNifty: updateBankNifty
+  updateBankNifty: updateBankNifty,
+  latestbspdata: latestbspdata,
+  bankniftysp1data: bankniftysp1data,
+  bankniftysp2data: bankniftysp2data,
+  bankniftysp3data: bankniftysp3data
 }
 //module.exports = router;
