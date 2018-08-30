@@ -1,4 +1,3 @@
-
 var express = require('express');
 var router = express.Router();
 
@@ -16,7 +15,7 @@ var globalvar = require('../common/globalvar');
 var banknifty = require('./bankniftyoptiondata');
 var bankniftyanalytics = require('./bankniftyanalytics');
 var dt = new Date();
-var updateonce = false;
+var fetchBankNifty = false;
 // var niftyurl = "https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp";
 // var optionUrl = "https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp";
 // var moneyControlURL = 'https://www.moneycontrol.com/indian-indices/nifty-50-9.html';
@@ -290,31 +289,38 @@ var endTime = moment('18:59', "HH:mm");
 setInterval(function () {
   // Do something every 5 seconds
   console.log('Looking for new Nifty data [ALL SPS]....');
-  if (globalvar.IsMarketClosed()) {
+  if (globalvar.IsMarketClosed() || globalvar.marketoff == true) {
     globalvar.stopFetchingData = true;
     return;
   }
 
   if (globalvar.stopFetchingData) {
     globalvar.stopFetchingData = false;
-    latestspdata = [];
-    niftysp1data = { sp: 0, data: [] };
-    niftysp2data = { sp: 0, data: [] };
-    niftysp3data = { sp: 0, data: [] };
-    niftyopen = 0;
-    banknifty.latestbspdata = [];
-    banknifty.bankniftysp1data = { sp: 0, data: [] };
-    banknifty.bankniftysp2data = { sp: 0, data: [] };
-    banknifty.bankniftysp3data = { sp: 0, data: [] };
-    wviewfunctions.todayswviewdata = [];
+    ClearData()
   }
+
   CheckForOptionData();
-  if (!updateonce) {
-    updateonce = true;
+  var dataupdated = true;
+  if (fetchBankNifty) {
+    for (let index = 0; index < bankniftyanalytics.bankniftyjson.length; index++) {
+      const element = bankniftyanalytics.bankniftyjson[index];
+      if (!globalvar.IsNullorUndefined(element.open)) {
+        dataupdated = false;
+        bankniftyanalytics.FetchOpen();
+        return;
+      }
+
+    }
+  }
+
+  if (dataupdated) {
+    console.log('call for Bank nifty data %%%%%%%%%%');
+    fetchBankNifty = false;
     bankniftyanalytics.updatebankniftyData();
   }
 
-}, 60000);
+
+}, 120000); //900000
 
 
 
@@ -353,6 +359,39 @@ function CheckForOptionData() {
   banknifty.updateBankNifty();
 
 }
+
+function ClearData() {
+  globalvar.stopFetchingData = false;
+
+  //clear nifty data
+  latestspdata = [];
+  niftysp1data = { sp: 0, data: [] };
+  niftysp2data = { sp: 0, data: [] };
+  niftysp3data = { sp: 0, data: [] };
+  niftyopen = 0;
+  //clear bank nifty analytics data
+  bankniftyanalytics.startfetchingOI = false;
+  for (let index = 0; index < bankniftyanalytics.bankniftyjson.length; index++) {
+    const element = bankniftyanalytics.bankniftyjson[index];
+    if (!globalvar.IsNullorUndefined(element.open)) {
+      element.open = null;
+      element.sp1data = { sp: 0, data: [] };
+      element.sp2data = { sp: 0, data: [] };
+      element.sp3data = { sp: 0, data: [] };
+
+    }
+
+    fetchBankNifty = true;
+    //clear bank nifty data
+    banknifty.latestbspdata = [];
+    banknifty.bankniftysp1data = { sp: 0, data: [] };
+    banknifty.bankniftysp2data = { sp: 0, data: [] };
+    banknifty.bankniftysp3data = { sp: 0, data: [] };
+    wviewfunctions.todayswviewdata = [];
+
+  }
+}
+
 router.post('/data', function (req, res) {
 
   var result = [];
@@ -376,6 +415,7 @@ router.post('/data', function (req, res) {
 
 module.exports = {
   router: router,
-  CheckForOptionData: CheckForOptionData
+  CheckForOptionData: CheckForOptionData,
+  ClearData: ClearData
 }
 //module.exports = router;

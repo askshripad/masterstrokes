@@ -121,7 +121,7 @@ function createOptionDataOutPutFile(obj) {
 
 
 function IsExpiryWeekStarted() {
-  console.log('checking for expiry week ', globalvar.niftyurl);
+  //console.log('checking for expiry week ', globalvar.niftyurl);
   return new Promise((resolve, reject) => {
     osmosis.get(globalvar.niftyurl)
       .find('//select[@id="date"]')
@@ -138,7 +138,7 @@ function IsExpiryWeekStarted() {
         var lsmon = expdt.subtract(3, "days");
         var expiry = false;
         if (today >= lsmon && today <= lsThir) {
-          console.log('exp started');
+          //console.log('exp started');
           expiry = true;
           resolve(expiry);
           return true
@@ -159,11 +159,11 @@ function CalculateCOI(latestspdata) {
   callarrSPs.push(atmSP);
   callarrSPs.push(callATM1);
   callarrSPs.push(callATM2);
-  console.log('call arr ', callarrSPs);
+  //console.log('call arr ', callarrSPs);
   putarrSPs.push(atmSP);
   putarrSPs.push(putATM1);
   putarrSPs.push(putATM2);
-  console.log('put arr ', putarrSPs);
+  //console.log('put arr ', putarrSPs);
   var arrCallCOI = [];
   var arrCallOI = [];
   //var arrPutOI = [];
@@ -175,11 +175,11 @@ function CalculateCOI(latestspdata) {
   //var data = latestspdata;
   //console.log('saved data ', data);
   callarrSPs.forEach(element => {
-    console.log('input call sp ', element);
+    //console.log('input call sp ', element);
     //console.log('latest sp data ', latestspdata);
     //var picked = lodash.filter(latestspdata, x => x.sp == element);
     var picked = latestspdata.find(x => x.sp == element);
-    console.log('call picked ', picked);
+    //console.log('call picked ', picked);
     var temp = lodash.replace((picked.callcoi), ',', '');
     arrCallCOI.push(parseFloat(temp));
     arrCallLtp.push(parseFloat(picked.callltp));
@@ -203,42 +203,42 @@ function CalculateCOI(latestspdata) {
   var dt = new Date();
 
   var newtime = moment(dt).format("HH:mm:ss");
-  console.log('CALL Details ++++++++++++', newtime);
-  console.log('CALL ATM:' + callarrSPs[0], 'CALL1:' + callarrSPs[1], 'CALL2:' + callarrSPs[2]);
-  console.log('CALL OI:' + arrCallOI[0], 'OI1:' + arrCallOI[1], 'OI2:' + arrCallOI[2]);
-  console.log('CALL COI:' + arrCallCOI[0], 'COI1:' + arrCallCOI[1], 'COI2:' + arrCallCOI[2]);
-  console.log('Callltp:' + arrCallLtp[0], 'LTP1:' + arrCallLtp[1], 'LTP2:' + arrCallLtp[2]);
+  // console.log('CALL Details ++++++++++++', newtime);
+  // console.log('CALL ATM:' + callarrSPs[0], 'CALL1:' + callarrSPs[1], 'CALL2:' + callarrSPs[2]);
+  // console.log('CALL OI:' + arrCallOI[0], 'OI1:' + arrCallOI[1], 'OI2:' + arrCallOI[2]);
+  // console.log('CALL COI:' + arrCallCOI[0], 'COI1:' + arrCallCOI[1], 'COI2:' + arrCallCOI[2]);
+  // console.log('Callltp:' + arrCallLtp[0], 'LTP1:' + arrCallLtp[1], 'LTP2:' + arrCallLtp[2]);
 
-  console.log('PUT Details ------------', newtime);
-  console.log('PUT ATM:' + putarrSPs[0], 'PUT1:' + putarrSPs[1], 'PUT2:' + putarrSPs[2]);
-  console.log('PUT COI:' + arrPutCOI[0], 'COI1:' + arrPutCOI[1], 'COI2:' + arrPutCOI[2]);
-  console.log('Put ltp:' + arrPutLtp[0], 'LTP1:' + arrPutLtp[1], 'LTP2:' + arrPutLtp[2]);
+  // console.log('PUT Details ------------', newtime);
+  // console.log('PUT ATM:' + putarrSPs[0], 'PUT1:' + putarrSPs[1], 'PUT2:' + putarrSPs[2]);
+  // console.log('PUT COI:' + arrPutCOI[0], 'COI1:' + arrPutCOI[1], 'COI2:' + arrPutCOI[2]);
+  // console.log('Put ltp:' + arrPutLtp[0], 'LTP1:' + arrPutLtp[1], 'LTP2:' + arrPutLtp[2]);
 
   var totalCallCOI = arrCallCOI[0] + arrCallCOI[1] + arrCallCOI[2];  //atmcoi+call1coi+call2coi
   totalCallCOI = parseFloat(totalCallCOI);
   totalCallCOI = totalCallCOI.toFixed(2);
-  console.log('totalCallCOI: ' + totalCallCOI);
+  //console.log('totalCallCOI: ' + totalCallCOI);
 
   var totalCallOI = arrCallOI[0] + arrCallOI[1] + arrCallOI[2];  //atmcoi+call1coi+call2coi
   totalCallOI = parseFloat(totalCallOI);
   totalCallOI = totalCallOI.toFixed(2);
-  console.log('totalCallOI: ' + totalCallCOI);
+  //console.log('totalCallOI: ' + totalCallCOI);
 
   var totalPutCOI = arrPutCOI[0] + arrPutCOI[1] + arrPutCOI[2];   //atmcoi+put1coi+put2coi
   totalPutCOI = parseFloat(totalPutCOI);
   totalPutCOI = totalPutCOI.toFixed(2);
-  console.log('totalPutCOI1: ' + totalPutCOI);
+  //console.log('totalPutCOI1: ' + totalPutCOI);
 
   var totalPutOI = arrPutOI[0] + arrPutOI[1] + arrPutOI[2];   //atmcoi+put1coi+put2coi
   totalPutOI = parseFloat(totalPutOI);
   totalPutOI = totalPutOI.toFixed(2);
-  console.log('totalPutOI: ' + totalPutOI);
+  //console.log('totalPutOI: ' + totalPutOI);
 
   //
   var item = {};
   var now = new Date();
   var ist = moment(now).utcOffset("+05:30").format();//moment.utc().format('DD-MM-YYYY HH:mm:ss');//globalvar.convertLocalDatetoUTCDate(now);
-  console.log('IST : ', ist);
+  //console.log('IST : ', ist);
   // var local1 = moment(utc1).local();
   // console.log('LOCAL1 : ', local1);
   //console.log('UTC FULL TIME %%%%% ', moment(now).utc());
@@ -267,7 +267,7 @@ function CalculateCOI(latestspdata) {
   // console.log('modified call OI ', item.calloi);
   //
 
-  console.log('current day ', now.getDate());
+  //console.log('current day ', now.getDate());
   if (now.getDate() <= 15) { //OTM
     console.log('OTM');
     item.callsp = callarrSPs[1];
@@ -321,7 +321,7 @@ function CalculateCOI(latestspdata) {
     if (item.calloifromhi == undefined)
       item.calloifromhi = 0;
 
-    console.log('min and max call oi : ', minoi, maxoi, item.calloifromlow, item.calloifromhi);
+    //console.log('min and max call oi : ', minoi, maxoi, item.calloifromlow, item.calloifromhi);
 
     if (item.calloi > minoi) {
       item.calloifromlow = item.calloi - minoi;
@@ -340,7 +340,7 @@ function CalculateCOI(latestspdata) {
       return item.putoi;
     }));
 
-    console.log('min and max putoi : ', minputoi, maxputoi);
+    //console.log('min and max putoi : ', minputoi, maxputoi);
     if (item.putoi > minputoi) {
       item.putoifromlow = item.putoi - minputoi;
       item.putoifromlow = item.putoifromlow.toFixed(2);
@@ -353,11 +353,11 @@ function CalculateCOI(latestspdata) {
 
   }
 
-  console.log('CALL OI DIff high low ', item.calloifromhigh, item.calloifromlow);
-  console.log('PUT OI DIff high low ', item.putoifromhigh, item.putoifromlow);
+  //console.log('CALL OI DIff high low ', item.calloifromhigh, item.calloifromlow);
+  //console.log('PUT OI DIff high low ', item.putoifromhigh, item.putoifromlow);
   //
   //niftyoptiondata.latestspdata = [];
-  console.log('Appending wview data ');
+  //console.log('Appending wview data ');
   todayswviewdata.push(item);
   AppendDataToJsonFile(item, globalvar.wviewfile);
   latestspdata = null;
@@ -385,14 +385,14 @@ CheckWritersView = function (newspdata) {
   niftyoptiondata.getATM()
     .then(function (atmDT) {
       // console.log(atm);
-      console.log('after getatm ', atmDT[0]);
+      //console.log('after getatm ', atmDT[0]);
       atmSP = Number(atmDT[0]);
       //if (IsExpiryWeekStarted()) {
       IsExpiryWeekStarted()
         .then
         (expiry => {
           if (expiry) {
-            console.log('inside expiry  ');
+            //console.log('inside expiry  ');
             callATM1 = atmSP - 50; // ITM
             callATM2 = atmSP - 100; //FAR ITM
 

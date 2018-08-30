@@ -129,7 +129,7 @@ function fetchbankniftyData(element) {
       putcoi: 'td[21]'
     })
     .data(item => {
-      //console.log('new item', item);
+      //console.log('new item in Bank nifty analytics...', item);
       var dt = new Date();
       item.date = moment(dt).utcOffset("+05:30").format("DD-MM-YYYY");
       item.time = moment(dt).utcOffset("+05:30").format("HH:mm");
@@ -137,8 +137,10 @@ function fetchbankniftyData(element) {
       //var lowerspRange = bankniftyopen - 200;
       //var higherspRange = bankniftyopen + 200;
       //if (!IsNullorUndefined(sp) && sp >= lowerspRange && sp <= higherspRange) {
-      if (!IsNullorUndefined(item.sp) && (item.sp == element.sp1data.sp || item.sp == element.sp2data.sp
-        || item.sp == element.sp3data.sp)) {
+      if (!IsNullorUndefined(item.sp) && !IsNullorUndefined(item.callcoi) && !IsNullorUndefined(item.putcoi) &&
+        (item.sp == element.sp1data.sp || item.sp == element.sp2data.sp
+          || item.sp == element.sp3data.sp)) {
+        console.log('new item in Bank nifty analytics...', item);
         parseoptiondata(element, item)
         //}
       }
@@ -172,60 +174,87 @@ function fetchbankniftyData(element) {
 
 }
 
+function CreateBankNiftyDataTable() {
+  var tabledata = [];
+  var backcolor = '';
+
+  for (let index = 0; index < bankniftyjson.length; index++) {
+    const element = bankniftyjson[index];
+    if (!globalvar.IsNullorUndefined(element.sp1data.data) && element.sp1data.data.length > 0) {
+      var totalce = element.sp1data.data[element.sp1data.data.length - 1].callcoi + element.sp2data.data[element.sp2data.data.length - 1].callcoi
+        + element.sp3data.data[element.sp3data.data.length - 1].callcoi;
+      var totalpe = element.sp1data.data[element.sp1data.data.length - 1].putcoi + element.sp2data.data[element.sp2data.data.length - 1].putcoi
+        + element.sp3data.data[element.sp3data.data.length - 1].putcoi;
+      backcolor = '';
+      if (totalce < 0 && totalpe < 0) {
+        var ce = Math.abs(totalce);
+        var pe = Math.abs(totalpe);
+        //console.log('NEGATIVE ', ce, pe);
+        if (ce > pe) {
+          backcolor = 'green';
+        }
+        else {
+          backcolor = 'red';
+        }
+        //backcolor = '';
+      }
+      else if (totalce < 0) {
+        backcolor = 'green';
+      }
+      else if (totalpe < 0) {
+        backcolor = 'red';
+      }
+
+      tabledata.push({ quote: element.quote, totalce: totalce, totalpe: totalpe, backcolor: backcolor });
+    }
+
+  }
+
+  return tabledata;
+
+}
+
 router.post('/data', function (req, res) {
 
   var result = [];
   var dt = new Date();
   console.log('inside bank nifty Analytics data..... ', req.body.fetchall, bankniftydata.bankniftysp1data.data.length);
+  //var tabledata = CreateBankNiftyDataTable()
 
-  if (req.body.fetchall == false) {
-    var banknifty = null;
-    if (bankniftydata.bankniftysp1data.data.length > 0) {
-      banknifty = {
-        sp1data: bankniftydata.bankniftysp1data, sp2data: bankniftydata.bankniftysp2data,
-        sp3data: bankniftydata.bankniftysp3data, close: bnclose
-      }
+  var banknifty = null;
+  if (bankniftydata.bankniftysp1data.data.length > 0) {
+    banknifty = {
+      sp1data: bankniftydata.bankniftysp1data, sp2data: bankniftydata.bankniftysp2data,
+      sp3data: bankniftydata.bankniftysp3data, close: bnclose
     }
-    //console.log('Bank Nifty Data ', banknifty);
-    if (bankniftyjson.length == 6) {
-      res.send({
-        banknifty: banknifty,
-        data1: bankniftyjson[0], data2: bankniftyjson[1], data3: bankniftyjson[2],
-        data4: bankniftyjson[3], data5: bankniftyjson[4], data6: bankniftyjson[5],
-        makertoff: globalvar.marketoff
-      });
-    }
-    else {
-      res.send({
-        banknifty: null,
-        data1: null, data2: null, data3: null, data4: null, data5: null, data6: null, makertoff: globalvar.marketoff
-      });
-    }
+  }
+  console.log('Bank Nifty analytics Data ', bankniftyjson);
+  if (bankniftyjson.length > 1) {
+    res.send({
+      banknifty: banknifty,
+      data1: bankniftyjson[0], data2: bankniftyjson[1], data3: bankniftyjson[2],
+      data4: bankniftyjson[3], data5: bankniftyjson[4], data6: bankniftyjson[5],
+      makertoff: globalvar.marketoff
+    });
   }
   else {
-    if (bankniftyjson.length == 6) {
-      var banknifty = null;
-      if (bankniftydata.bankniftysp1data.data.length > 0) {
-        banknifty = {
-          sp1data: bankniftydata.bankniftysp1data, sp2data: bankniftydata.bankniftysp2data,
-          sp3data: bankniftydata.bankniftysp3data, close: bnclose
-        }
-      }
-      res.send({
-        banknifty: banknifty,
-        data1: bankniftyjson[0], data2: bankniftyjson[1], data3: bankniftyjson[2],
-        data4: bankniftyjson[3], data5: bankniftyjson[4], data6: bankniftyjson[5],
-        makertoff: globalvar.marketoff
-      });
-    }
-    else {
-      res.send({
-        banknifty: null,
-        data1: null, data2: null, data3: null, data4: null, data5: null, data6: null, makertoff: globalvar.marketoff
-      });
-    }
+    res.send({
+      banknifty: null,
+      data1: null, data2: null, data3: null, data4: null, data5: null, data6: null, makertoff: globalvar.marketoff
+    });
   }
 
+});
+
+router.post('/datatable', function (req, res) {
+
+  var result = [];
+  var dt = new Date();
+  console.log('inside bank nifty Analytics datatable ######### ', req.body.fetchall, bankniftydata.bankniftysp1data.data.length);
+  var tabledata = CreateBankNiftyDataTable();
+  res.send({
+    tabledata: tabledata, makertoff: globalvar.marketoff
+  });
 });
 
 function updatebankniftyData() {
@@ -233,24 +262,35 @@ function updatebankniftyData() {
   for (let index = 0; index < bankniftyjson.length; index++) { //
     const element = bankniftyjson[index];
     if (!globalvar.IsNullorUndefined(element.open)) {
-      console.log('Bank Nifty Analytics Data ' + element.quote);
+      console.log('Fetching Bank Nifty Analytics Data ' + element.quote);
       fetchbankniftyData(element);
     }
 
   }
 }
+
+var stopFetchingData = false;
 setInterval(function () {
   // Do something every 5 seconds
+  if (globalvar.IsMarketClosed() || globalvar.marketoff == true) {
+    stopFetchingData = true;
+    return;
+  }
+
+  console.log('updatting bank nifty analytics data.................................... ');
   updatebankniftyData();
+  
   // var now = new Date();
   // istHrs = moment(now).utcOffset("+05:30").format('HH');
   // istmins = moment(now).utcOffset("+05:30").format('mm');
 
-}, 900000);
+}, globalvar.bnatimeinterval); //900000
 
 module.exports = {
   router: router,
   FetchOpen: FetchOpen,
   updatebankniftyData: updatebankniftyData,
+  bankniftyjson: bankniftyjson,
+  startfetchingOI: startfetchingOI
 }
 //module.exports = router;

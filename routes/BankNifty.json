@@ -34,5 +34,17 @@
     "nseurl": "https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=2304&symbol=YESBANK&symbol=yes%20bank&instrument=OPTSTK&date=-&segmentLink=17&segmentLink=17",
     "quote": "YES BANK",
     "SPDiff": 10
+  },
+  {
+    "url": "https://www.moneycontrol.com/india/stockpricequote/banks-private-sector/indusindbank/IIB",
+    "nseurl": "https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=1656&symbol=INDUSINDBK&symbol=indusind&instrument=OPTSTK&date=-&segmentLink=17&segmentLink=17",
+    "quote": "INDUSIND BANK",
+    "SPDiff": 20
+  },
+  {
+    "url": "https://www.moneycontrol.com/india/stockpricequote/banks-private-sector/rblbank/RB03",
+    "nseurl": "https://www.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbolCode=14160&symbol=RBLBANK&symbol=rblbank&instrument=OPTSTK&date=-&segmentLink=17&segmentLink=17",
+    "quote": "RBL BANK",
+    "SPDiff": 10
   }
 ]

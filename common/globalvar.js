@@ -17,6 +17,7 @@ exports.banknifty = { open: null, high: null, low: null, close: null };
 exports.marketoff = false;
 exports.wviewfile = null;
 exports.stopFetchingData = false;
+exports.bnatimeinterval = 300000;
 exports.convertLocalDatetoUTCDate = function (date) {
     return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds());
 }

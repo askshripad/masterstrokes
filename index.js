@@ -17,6 +17,7 @@ var niftyoptions = require('./routes/niftyoptiondata.js');
 var wview = require('./routes/writersview.js');
 var banknifty = require('./routes/bankniftyoptiondata.js');
 var bankniftyanalytics = require('./routes/bankniftyanalytics.js');
+var admin = require('./routes/admin.js');
 
 const html = path.join(__dirname, 'build');
 var dt = new Date();
@@ -56,10 +57,19 @@ app.use('/bankniftyanalytics', function (req, res, next) {
     next();
 });
 
+
+app.use('/admin', function (req, res, next) {
+    console.log("A new ADMIN request received at " + Date.now());
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers , *");
+    next();
+});
+
 app.use('/writersview', wview);
 app.use('/niftyoptiondata', niftyoptions.router);
 app.use('/bankniftydata', banknifty.router);
 app.use('/bankniftyanalytics', bankniftyanalytics.router);
+app.use('/admin', admin);
 
 var port = process.env.PORT || 8080;// 5000;
 
@@ -166,7 +176,7 @@ var server = app.listen(port, function () {
             console.log('OLD FILES DELETED');
             console.log('NEW DAY STARTED .............');
             niftyoptions.CheckForOptionData();
-           
+
         });
     }
 
